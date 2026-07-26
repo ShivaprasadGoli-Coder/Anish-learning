@@ -12,7 +12,7 @@
 <form method="post" action="/quiz/{{ topic["id"] }}/submit" id="quiz-form">
   <input type="hidden" name="next_stage" value="{{ next_stage }}">
   {% for q in questions %}
-  <div class="q-card {% if loop.first %}visible{% endif %}" id="qc{{ loop.index }}">
+  <div class="q-card" id="qc{{ loop.index }}" style="display:none;">
     <input type="hidden" name="question_ids" value="{{ q["id"] }}">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
       <div style="width:34px;height:34px;border-radius:50%;background:{{ color }};color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;flex-shrink:0;">{{ loop.index }}</div>
@@ -28,7 +28,7 @@
       {% endfor %}
     {% else %}
       <input type="text" class="type-in" name="answer_{{ q["id"] }}" placeholder="Type your answer here..." autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();advance({{ loop.index }});}">
-      <button type="button" class="btn btn-p btn-block" style="margin-top:12px;" onclick="advance({{ loop.index }})">Next →</button>
+      <button type="button" class="btn btn-p btn-block" style="margin-top:12px;" onclick="advance({{ loop.index }})">Next</button>
     {% endif %}
   </div>
   {% endfor %}
@@ -37,66 +37,39 @@
       <div style="font-size:72px;margin-bottom:16px;">🎉</div>
       <h2 style="font-size:26px;font-weight:900;color:#302b63;margin-bottom:8px;">You finished all {{ questions|length }} questions!</h2>
       <p style="color:#666;font-size:16px;margin-bottom:28px;">Amazing work Anish! Tap below to see how you did.</p>
-      <button type="submit" class="btn btn-g btn-lg btn-block" style="font-size:20px;padding:20px;">
-        🏆 See My Results!
-      </button>
+      <button type="submit" class="btn btn-g btn-lg btn-block" style="font-size:20px;padding:20px;">🏆 See My Results!</button>
     </div>
   </div>
 </form>
 <div style="margin-top:14px;"><a href="/learn/{{ topic["id"] }}" class="btn btn-w btn-sm">Back to Lesson</a></div>
 <script>
-var current=1, tot={{ questions|length }};
-
-// Make sure only question 1 is visible at start
-document.addEventListener("DOMContentLoaded", function(){
-  for(var i=1;i<=tot;i++){
-    var el=document.getElementById("qc"+i);
-    if(el){ el.style.display = (i===1) ? "block" : "none"; }
-  }
+var tot={{ questions|length }};
+document.addEventListener("DOMContentLoaded",function(){
+  document.getElementById("qc1").style.display="block";
   updateProgress(1);
 });
-
 function updateProgress(n){
-  var pct = Math.round(((n-1)/tot)*100);
-  document.getElementById("prog").style.width = pct + "%";
-  document.getElementById("qnum").textContent = n;
+  document.getElementById("prog").style.width=Math.round(((n-1)/tot)*100)+"%";
+  document.getElementById("qnum").textContent=n;
 }
-
-function pick(btn, qid, n, val){
-  // Set the answer value
-  document.getElementById("ans_"+qid).value = val;
-  // Highlight selected option
-  btn.closest(".q-card").querySelectorAll(".opt").forEach(function(b){
-    b.classList.remove("sel");
-    b.querySelector(".ltr").style.background="";
-    b.querySelector(".ltr").style.color="";
-  });
+function pick(btn,qid,n,val){
+  document.getElementById("ans_"+qid).value=val;
+  btn.closest(".q-card").querySelectorAll(".opt").forEach(function(b){b.classList.remove("sel");b.querySelector(".ltr").style.background="";b.querySelector(".ltr").style.color="";});
   btn.classList.add("sel");
   btn.querySelector(".ltr").style.background="{{ color }}";
   btn.querySelector(".ltr").style.color="white";
-  // Move to next question after short delay
-  setTimeout(function(){ advance(n); }, 420);
+  setTimeout(function(){advance(n);},420);
 }
-
 function advance(n){
-  // Hide current question
-  var cur = document.getElementById("qc"+n);
-  if(cur) cur.style.display="none";
-
-  if(n < tot){
-    // Show next question
-    var next = document.getElementById("qc"+(n+1));
-    if(next) next.style.display="block";
-    current = n+1;
+  document.getElementById("qc"+n).style.display="none";
+  if(n<tot){
+    document.getElementById("qc"+(n+1)).style.display="block";
     updateProgress(n+1);
-    // Scroll to top of page so Anish sees the question
-    window.scrollTo({top:0, behavior:'smooth'});
+    window.scrollTo({top:0,behavior:"smooth"});
   } else {
-    // All done — show finish screen
     document.getElementById("prog").style.width="100%";
-    document.getElementById("qnum").textContent=tot;
     document.getElementById("submit-area").style.display="block";
-    window.scrollTo({top:0, behavior:'smooth'});
+    window.scrollTo({top:0,behavior:"smooth"});
   }
 }
 </script>
