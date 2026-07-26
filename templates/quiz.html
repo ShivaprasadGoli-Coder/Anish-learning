@@ -80,7 +80,7 @@ function pick(btn){
   var val=btn.getAttribute('data-val');
   document.getElementById('ans'+qid).value=val;
   btn.classList.add('chosen');
-  setTimeout(function(){busy=false;goTo(n+1);},400);
+  goTo(n+1);
 }
 goTo(1);
 </script>
