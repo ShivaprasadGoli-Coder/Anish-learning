@@ -117,9 +117,7 @@ def quiz(topic_id):
     questions = (easy[:7] + med[:7] + hard[:6]) or all_qs[:10]
     current_stage = latest['review_stage'] if latest else None
     next_stage = 0 if current_stage is None else (min(current_stage+1, 4))
-    return render_template('quiz.html', topic=topic, questions=questions,
-        next_stage=next_stage, REVIEW_LABELS=REVIEW_LABELS,
-        color=SUBJECT_COLORS.get(topic['subject'],'#4F46E5'))
+    return render_template('quiz.html', topic=topic, questions=questions, next_stage=next_stage, COLORS=COLORS, EMOJIS=EMOJIS, parent_mode=PARENT_MODE)
 
 @app.route('/quiz/<int:topic_id>/submit', methods=['POST'])
 def quiz_submit(topic_id):
