@@ -59,8 +59,10 @@
 
 <script>
 var total = {{ questions|length }};
+var answered = false;
 
 function pick(btn) {
+  if (answered) return;
   var qid = btn.getAttribute("data-qid");
   var n = parseInt(btn.getAttribute("data-n"));
   var val = btn.getAttribute("data-val");
@@ -72,7 +74,11 @@ function pick(btn) {
   });
   btn.classList.add("sel");
   btn.querySelector(".ltr").style.background = "#6C63FF";
-  setTimeout(function() { advance(n); }, 400);
+  answered = true;
+  setTimeout(function() {
+    answered = false;
+    advance(n);
+  }, 500);
 }
 
 function advance(n) {
@@ -84,12 +90,15 @@ function advance(n) {
     var next = document.getElementById("qc" + (n + 1));
     if (next) next.style.display = "block";
     document.getElementById("qnum").textContent = n + 1;
-    
   } else {
     document.getElementById("prog").style.width = "100%";
     document.getElementById("done").style.display = "block";
-    
   }
 }
+
+history.pushState(null, null, location.href);
+window.onpopstate = function() {
+  history.pushState(null, null, location.href);
+};
 </script>
 {% endblock %}
