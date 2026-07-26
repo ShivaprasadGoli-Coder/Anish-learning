@@ -84,11 +84,11 @@ function advance(n) {
     var next = document.getElementById("qc" + (n + 1));
     if (next) next.style.display = "block";
     document.getElementById("qnum").textContent = n + 1;
-    window.scrollTo(0, 0);
+    
   } else {
     document.getElementById("prog").style.width = "100%";
     document.getElementById("done").style.display = "block";
-    window.scrollTo(0, 0);
+    
   }
 }
 </script>
