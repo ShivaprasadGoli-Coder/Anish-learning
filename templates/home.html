@@ -2,56 +2,54 @@
 {% block title %}Home — Anish's 11+ App{% endblock %}
 {% block content %}
 
-<div class="card-glass" style="text-align:center;padding:32px;">
+<div style="text-align:center;padding:40px 20px 32px;">
   {% if parent_mode %}
-  <div style="font-size:48px;">👀</div>
-  <h1 style="font-size:26px;font-weight:900;margin:10px 0;">Parent Dashboard</h1>
-  <p style="color:rgba(255,255,255,0.7);">Live view of Anish's learning progress</p>
+  <div style="font-size:48px;margin-bottom:12px;">👀</div>
+  <h1 style="font-size:28px;font-weight:900;font-family:'Space Grotesk',sans-serif;">Parent Dashboard</h1>
   {% else %}
-  <div style="font-size:56px;">⭐</div>
-  <h1 style="font-size:28px;font-weight:900;margin:10px 0;">Hello Anish! Ready to learn? 🚀</h1>
-  <p style="color:rgba(255,255,255,0.8);font-size:15px;">Read the lesson first, then answer questions. You can do it!</p>
+  <div style="font-size:64px;margin-bottom:12px;animation:bounce 2s infinite;">⭐</div>
+  <h1 style="font-size:30px;font-weight:900;font-family:'Space Grotesk',sans-serif;background:linear-gradient(135deg,#6C63FF,#A78BFA,#00C896);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Hello Anish! 🚀</h1>
+  <p style="color:rgba(255,255,255,0.6);font-size:15px;margin-top:8px;">Read the lesson, then answer questions. You've got this!</p>
   {% endif %}
 </div>
 
 <div class="stats">
-  <div class="stat"><div class="n">{{ started }}<span style="font-size:16px;opacity:0.6;">/{{ total }}</span></div><div class="l">Started</div></div>
-  <div class="stat"><div class="n" style="color:#7fff7f;">{{ mastered }}</div><div class="l">⭐ Mastered</div></div>
-  <div class="stat"><div class="n" style="color:{% if due|length > 0 %}#ff6b6b{% else %}#7fff7f{% endif %};">{{ due|length }}</div><div class="l">Due Today</div></div>
-  <div class="stat"><div class="n" style="color:#f9ca24;">{{ total }}</div><div class="l">Total Topics</div></div>
+  <div class="stat"><div class="n" style="color:#A78BFA;">{{ started }}<span style="font-size:16px;opacity:0.5;">/{{ total }}</span></div><div class="l">Started</div></div>
+  <div class="stat"><div class="n" style="color:#00C896;">{{ mastered }}</div><div class="l">⭐ Mastered</div></div>
+  <div class="stat"><div class="n" style="color:{% if due|length > 0 %}#FF6B6B{% else %}#00C896{% endif %};">{{ due|length }}</div><div class="l">Due Today</div></div>
+  <div class="stat"><div class="n" style="color:#FBB724;">{{ total }}</div><div class="l">Topics</div></div>
 </div>
 
 {% if due %}
-<div class="sec-hdr">⚡ Review These Now — Don't Let Them Fade!</div>
+<div class="sec-hdr">⚡ Review These Now</div>
 {% for d in due %}
-<a href="/learn/{{ d['tid'] }}" class="topic" style="border-left-color:{{ COLORS.get(d['subject'],'#4F46E5') }};">
-  <div class="t-num" style="background:{{ COLORS.get(d['subject'],'#4F46E5') }};">{{ EMOJIS.get(d['subject'],'📖') }}</div>
+<a href="/learn/{{ d['tid'] }}" class="topic" style="border-left-color:{{ COLORS.get(d['subject'],'#6C63FF') }};">
+  <div class="t-num" style="background:{{ COLORS.get(d['subject'],'#6C63FF') }};">{{ EMOJIS.get(d['subject'],'📖') }}</div>
   <div class="t-body">
     <div class="t-sec">{{ d['subject'] }} · {{ d['section'] }}</div>
     <div class="t-title">{{ d['title'] }}</div>
     <div class="t-meta">
       <span class="badge b-overdue">Due {{ d['next_review_date'] }}</span>
-      <span class="badge b-s{{ d['review_stage'] }}">{{ REVIEW_LABELS[d['review_stage']+1] if d['review_stage'] is not none and d['review_stage'] < 4 else 'Final review' }}</span>
     </div>
   </div>
-  {% if not parent_mode %}<div class="btn btn-p btn-sm">Study Now →</div>{% endif %}
+  {% if not parent_mode %}<div class="btn btn-p btn-sm">Study →</div>{% endif %}
 </a>
 {% endfor %}
 {% endif %}
 
-<div class="sec-hdr">📚 Choose a Subject to Study</div>
+<div class="sec-hdr">📚 Choose a Subject</div>
 <div class="sub-grid">
-  <a href="/subject/Maths" class="sub-card" style="background:linear-gradient(135deg,#4F46E5,#7C3AED);">
+  <a href="/subject/Maths" class="sub-card" style="background:linear-gradient(135deg,#4338CA,#6C63FF);">
     <span class="e">🔢</span><div class="n">Maths</div>
-    <div class="c">Number · Algebra · Geometry<br>Fractions · Statistics</div>
+    <div class="c">Number · Algebra<br>Geometry · Fractions</div>
   </a>
-  <a href="/subject/English" class="sub-card" style="background:linear-gradient(135deg,#059669,#10B981);">
+  <a href="/subject/English" class="sub-card" style="background:linear-gradient(135deg,#065F46,#00C896);">
     <span class="e">📚</span><div class="n">English</div>
-    <div class="c">Grammar · Vocabulary<br>Comprehension · Spelling</div>
+    <div class="c">Grammar · Vocabulary<br>Comprehension</div>
   </a>
-  <a href="/subject/Verbal Reasoning" class="sub-card" style="background:linear-gradient(135deg,#DC2626,#EF4444);">
-    <span class="e">🧠</span><div class="n">Verbal Reasoning</div>
-    <div class="c">Word Puzzles<br>Applied Reasoning</div>
+  <a href="/subject/Verbal Reasoning" class="sub-card" style="background:linear-gradient(135deg,#991B1B,#FF6B6B);">
+    <span class="e">🧠</span><div class="n">Verbal</div>
+    <div class="c">Word Puzzles<br>Reasoning</div>
   </a>
 </div>
 
@@ -59,19 +57,21 @@
 <div class="sec-hdr">🕐 Recent Sessions</div>
 {% for s in recent %}
 <div class="mini" style="display:flex;align-items:center;gap:12px;">
-  <div style="font-size:26px;">{{ '😄' if s['rating']=='great' else '🙂' if s['rating']=='ok' else '😕' }}</div>
+  <div style="font-size:28px;">{{ '😄' if s['rating']=='great' else '🙂' if s['rating']=='ok' else '😕' }}</div>
   <div style="flex:1;">
     <div style="font-weight:800;font-size:14px;">{{ s['title'] }}</div>
-    <div style="font-size:12px;color:#666;margin-top:2px;">{{ s['subject'] }} · {{ s['session_date'] }}
-      {% if s['total_questions'] and s['total_questions'] > 0 %}
-      · Score: {{ s['score'] }}/{{ s['total_questions'] }} ({{ ((s['score']/s['total_questions'])*100)|int }}%)
-      {% endif %}
+    <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;">{{ s['subject'] }} · {{ s['session_date'] }}
+      {% if s['total_questions'] and s['total_questions'] > 0 %}· {{ s['score'] }}/{{ s['total_questions'] }} ({{ ((s['score']/s['total_questions'])*100)|int }}%){% endif %}
     </div>
   </div>
   <span class="badge b-{{ s['rating'] }}">{{ s['rating']|title }}</span>
 </div>
 {% endfor %}
 {% else %}
-<div class="empty"><div class="e">🚀</div><p style="color:rgba(255,255,255,0.6);">No sessions yet — click a subject above to start!</p></div>
+<div class="empty"><div class="e">🚀</div><p>No sessions yet — pick a subject above to start!</p></div>
 {% endif %}
+
+<style>
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+</style>
 {% endblock %}

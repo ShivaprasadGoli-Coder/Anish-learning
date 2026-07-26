@@ -2,27 +2,26 @@
 {% block title %}{{ subject }} — Anish's 11+ App{% endblock %}
 {% block content %}
 
-<div class="card-glass" style="text-align:center;padding:24px;background:linear-gradient(135deg,{{ color }}33,{{ color }}11);">
-  <div style="font-size:48px;">{{ emoji }}</div>
-  <h1 style="font-size:24px;font-weight:900;margin:8px 0;">{{ subject }}</h1>
-  <p style="color:rgba(255,255,255,0.7);font-size:14px;">Click a topic → Read the lesson → Answer questions</p>
+<div style="text-align:center;padding:32px 20px 24px;background:linear-gradient(135deg,{{ color }}22,transparent);border-radius:24px;margin-bottom:20px;border:1px solid {{ color }}33;">
+  <div style="font-size:52px;margin-bottom:10px;">{{ emoji }}</div>
+  <h1 style="font-size:26px;font-weight:900;font-family:'Space Grotesk',sans-serif;">{{ subject }}</h1>
+  <p style="color:rgba(255,255,255,0.5);font-size:14px;margin-top:6px;">Read the lesson → Answer questions → Master the topic</p>
 </div>
 
 {% for section, topics in sections.items() %}
 <div class="sec-hdr">{{ section }}</div>
 {% for t in topics %}
 {% set stage = t['max_stage'] %}
-{% if stage is none %}{% set bc='b-new' %}{% set bt='Not started' %}{% set bc2='#ddd' %}
-{% elif stage >= 4 %}{% set bc='b-mastered' %}{% set bt='⭐ Mastered' %}{% set bc2='#059669' %}
+{% if stage is none %}{% set bc='b-new' %}{% set bt='Not started' %}{% set bc2='rgba(255,255,255,0.2)' %}
+{% elif stage >= 4 %}{% set bc='b-mastered' %}{% set bt='⭐ Mastered' %}{% set bc2='#00C896' %}
 {% else %}{% set bcs=['b-s0','b-s1','b-s2','b-s3','b-s4'] %}{% set bc=bcs[stage] %}{% set bt=REVIEW_LABELS[stage]+' done' %}{% set bc2=color %}{% endif %}
 
 <a href="/learn/{{ t['id'] }}" class="topic" style="border-left-color:{{ bc2 }};">
-  <div class="t-num" style="background:{{ bc2 }};font-size:16px;">{{ loop.index }}</div>
+  <div class="t-num" style="background:{{ bc2 }};font-size:15px;">{{ loop.index }}</div>
   <div class="t-body">
     <div class="t-title">{{ t['title'] }}</div>
     <div class="t-meta">
       <span class="badge {{ bc }}">{{ bt }}</span>
-      {% if t['next_review'] %}<span class="badge" style="background:#f0f0f0;color:#666;">Next: {{ t['next_review'] }}</span>{% endif %}
       {% if t['last_score'] is not none and t['last_total'] and t['last_total'] > 0 %}<span class="badge b-new">{{ t['last_score'] }}/{{ t['last_total'] }} last time</span>{% endif %}
     </div>
   </div>
@@ -31,5 +30,5 @@
 {% endfor %}
 {% endfor %}
 
-<div style="margin-top:20px;"><a href="/" class="btn btn-w">← Back Home</a></div>
+<div style="margin-top:24px;"><a href="/" class="btn btn-w">← Home</a></div>
 {% endblock %}

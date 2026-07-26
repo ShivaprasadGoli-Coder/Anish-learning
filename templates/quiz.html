@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Quiz — {{ topic["title"] }}{% endblock %}
 {% block content %}
-{% set color = COLORS.get(topic["subject"],"#4F46E5") %}
-<div class="card-glass" style="padding:20px;margin-bottom:12px;">
-  <div style="font-size:16px;font-weight:900;margin-bottom:10px;">{{ topic["title"] }}</div>
-  <div style="display:flex;justify-content:space-between;color:rgba(255,255,255,0.8);font-size:13px;font-weight:700;margin-bottom:6px;">
+{% set color = COLORS.get(topic["subject"],"#6C63FF") %}
+<div class="card-glass" style="padding:20px;margin-bottom:16px;">
+  <div style="font-size:15px;font-weight:900;margin-bottom:10px;color:white;">{{ topic["title"] }}</div>
+  <div style="display:flex;justify-content:space-between;color:rgba(255,255,255,0.6);font-size:13px;font-weight:700;margin-bottom:8px;">
     <span>Question <span id="qnum">1</span> of {{ questions|length }}</span>
+    <span id="qlabel">Easy</span>
   </div>
   <div class="prog-wrap"><div class="prog-fill" id="prog" style="width:0%"></div></div>
 </div>
@@ -14,9 +15,9 @@
   {% for q in questions %}
   <div class="q-card" id="qc{{ loop.index }}" style="display:none;">
     <input type="hidden" name="question_ids" value="{{ q["id"] }}">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-      <div style="width:34px;height:34px;border-radius:50%;background:{{ color }};color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;flex-shrink:0;">{{ loop.index }}</div>
-      <div style="font-size:11px;color:#999;font-weight:700;">{% if q["difficulty"]==1 %}Easy{% elif q["difficulty"]==2 %}Medium{% else %}Hard{% endif %}</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:{{ color }};color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,0.3);">{{ loop.index }}</div>
+      <span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);">{% if q["difficulty"]==1 %}⚡ Easy{% elif q["difficulty"]==2 %}🔥 Medium{% else %}💎 Hard{% endif %}</span>
     </div>
     <div class="q-text">{{ q["question_text"] }}</div>
     {% if q["question_type"] == "mc" %}
@@ -28,36 +29,43 @@
       {% endfor %}
     {% else %}
       <input type="text" class="type-in" name="answer_{{ q["id"] }}" placeholder="Type your answer here..." autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();advance({{ loop.index }});}">
-      <button type="button" class="btn btn-p btn-block" style="margin-top:12px;" onclick="advance({{ loop.index }})">Next</button>
+      <button type="button" class="btn btn-p btn-block" style="margin-top:12px;" onclick="advance({{ loop.index }})">Next →</button>
     {% endif %}
   </div>
   {% endfor %}
   <div id="submit-area" style="display:none;">
-    <div class="card" style="text-align:center;padding:40px;">
-      <div style="font-size:72px;margin-bottom:16px;">🎉</div>
-      <h2 style="font-size:26px;font-weight:900;color:#302b63;margin-bottom:8px;">You finished all {{ questions|length }} questions!</h2>
-      <p style="color:#666;font-size:16px;margin-bottom:28px;">Amazing work Anish! Tap below to see how you did.</p>
-      <button type="submit" class="btn btn-g btn-lg btn-block" style="font-size:20px;padding:20px;">🏆 See My Results!</button>
+    <div class="card" style="text-align:center;padding:48px;">
+      <div style="font-size:80px;margin-bottom:16px;">🎉</div>
+      <h2 style="font-size:28px;font-weight:900;color:white;margin-bottom:8px;">All done, Anish!</h2>
+      <p style="color:rgba(255,255,255,0.6);font-size:16px;margin-bottom:32px;">You answered all {{ questions|length }} questions. Let's see how you did!</p>
+      <button type="submit" class="btn btn-g btn-lg btn-block" style="font-size:20px;">🏆 See My Results!</button>
     </div>
   </div>
 </form>
-<div style="margin-top:14px;"><a href="/learn/{{ topic["id"] }}" class="btn btn-w btn-sm">Back to Lesson</a></div>
+<div style="margin-top:16px;"><a href="/learn/{{ topic["id"] }}" class="btn btn-w btn-sm">← Back to Lesson</a></div>
 <script>
 var tot={{ questions|length }};
-document.addEventListener("DOMContentLoaded",function(){
+var labels=["","⚡ Easy","⚡ Easy","🔥 Medium","🔥 Medium","💎 Hard"];
+window.onload=function(){
+  for(var i=1;i<=tot;i++){
+    document.getElementById("qc"+i).style.display="none";
+  }
   document.getElementById("qc1").style.display="block";
   updateProgress(1);
-});
+};
 function updateProgress(n){
   document.getElementById("prog").style.width=Math.round(((n-1)/tot)*100)+"%";
   document.getElementById("qnum").textContent=n;
+  if(labels[n]) document.getElementById("qlabel").textContent=labels[n];
 }
 function pick(btn,qid,n,val){
   document.getElementById("ans_"+qid).value=val;
-  btn.closest(".q-card").querySelectorAll(".opt").forEach(function(b){b.classList.remove("sel");b.querySelector(".ltr").style.background="";b.querySelector(".ltr").style.color="";});
+  btn.closest(".q-card").querySelectorAll(".opt").forEach(function(b){
+    b.classList.remove("sel");
+    b.querySelector(".ltr").style.background="";
+  });
   btn.classList.add("sel");
   btn.querySelector(".ltr").style.background="{{ color }}";
-  btn.querySelector(".ltr").style.color="white";
   setTimeout(function(){advance(n);},420);
 }
 function advance(n){
