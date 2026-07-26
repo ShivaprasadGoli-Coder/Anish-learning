@@ -114,7 +114,7 @@ def quiz(topic_id):
     med  = [q for q in all_qs if q['difficulty']==2]
     hard = [q for q in all_qs if q['difficulty']==3]
     random.shuffle(easy); random.shuffle(med); random.shuffle(hard)
-    questions = (easy[:7] + med[:7] + hard[:6]) or all_qs[:10]
+    questions = (easy[:4] + med[:4] + hard[:2]) or all_qs[:10]
     current_stage = latest['review_stage'] if latest else None
     next_stage = 0 if current_stage is None else (min(current_stage+1, 4))
     return render_template('quiz.html', topic=topic, questions=questions,
