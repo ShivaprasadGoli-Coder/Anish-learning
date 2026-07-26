@@ -3,7 +3,6 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y libpq-dev gcc && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-COPY templates/ templates/
+ARG CACHEBUST=1
 COPY . .
 CMD gunicorn app:app --bind 0.0.0.0:$PORT
-REBUILD=1785071362
