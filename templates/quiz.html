@@ -2,86 +2,58 @@
 {% block title %}Quiz — {{ topic["title"] }}{% endblock %}
 {% block content %}
 {% set color = COLORS.get(topic["subject"],"#6C63FF") %}
-<style>
-.qcard{display:none;background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:24px;margin-bottom:16px;}
-.opt{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;width:100%;padding:16px 18px;margin:8px 0;border-radius:14px;border:2px solid #2A2A4A;background:rgba(255,255,255,0.03);font-size:16px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit;color:white;display:flex;align-items:center;gap:12px;}
-.opt.chosen{border-color:#6C63FF;background:rgba(108,99,255,0.2);}
-.ltr{width:36px;height:36px;border-radius:50%;background:#2A2A4A;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;flex-shrink:0;color:white;}
-.opt.chosen .ltr{background:#6C63FF;color:white;}
-.type-in{width:100%;padding:14px;border-radius:14px;border:2px solid #2A2A4A;font-size:16px;font-weight:700;font-family:inherit;background:rgba(255,255,255,0.05);color:white;margin-bottom:10px;}
-.prog-wrap{background:rgba(255,255,255,0.1);border-radius:50px;height:10px;overflow:hidden;margin-top:8px;}
-.prog-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,{{ color }},{{ color }}88);transition:width 0.4s;}
-</style>
-
-<div id="topbar" style="background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:20px;margin-bottom:16px;">
-  <div style="font-size:15px;font-weight:900;margin-bottom:8px;color:white;">{{ topic["title"] }}</div>
-  <div style="color:rgba(255,255,255,0.5);font-size:13px;font-weight:700;margin-bottom:6px;">Question <span id="qnum">1</span> of {{ questions|length }}</div>
-  <div class="prog-wrap"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+<div id="hd" style="background:#1A1A35;border:1px solid #2A2A4A;border-radius:16px;padding:16px;margin-bottom:16px;">
+  <div style="font-size:15px;font-weight:900;color:white;margin-bottom:6px;">{{ topic["title"] }}</div>
+  <div style="color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:8px;">Question <span id="qn">1</span> of {{ questions|length }}</div>
+  <div style="background:rgba(255,255,255,0.1);border-radius:50px;height:8px;overflow:hidden;"><div id="pg" style="height:100%;border-radius:50px;background:{{ color }};width:0%;"></div></div>
 </div>
-
-<form method="post" action="/quiz/{{ topic["id"] }}/submit" id="qform">
-  <input type="hidden" name="next_stage" value="{{ next_stage }}">
-  {% for q in questions %}
-  <div class="qcard" id="qc{{ loop.index }}">
-    <input type="hidden" name="question_ids" value="{{ q["id"] }}">
-    <div style="margin-bottom:14px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);">{% if q["difficulty"]==1 %}Easy{% elif q["difficulty"]==2 %}Medium{% else %}Hard{% endif %}</div>
-    <div style="font-size:18px;font-weight:800;line-height:1.6;margin-bottom:20px;color:white;">{{ q["question_text"] }}</div>
-    {% if q["question_type"] == "mc" %}
-      <input type="hidden" name="answer_{{ q["id"] }}" id="ans{{ q["id"] }}" value="">
-      {% for opt, ltr in [(q["option_a"],"A"),(q["option_b"],"B"),(q["option_c"],"C"),(q["option_d"],"D")] if opt %}
-      <button type="button" class="opt" data-qid="{{ q["id"] }}" data-n="{{ loop.index }}" data-val="{{ opt }}" onclick="pick(this)"><div class="ltr">{{ ltr }}</div><span>{{ opt }}</span></button>
-      {% endfor %}
-    {% else %}
-      <input type="text" class="type-in" name="answer_{{ q["id"] }}" placeholder="Type your answer...">
-      <button type="button" onclick="goTo({{ loop.index }}+1)" style="background:#6C63FF;color:white;border:none;padding:16px;border-radius:50px;font-size:16px;font-weight:800;cursor:pointer;width:100%;margin-top:8px;font-family:inherit;">Next →</button>
-    {% endif %}
-  </div>
-  {% endfor %}
-
-  <div id="done" style="display:none;background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:48px;text-align:center;">
-    <div style="font-size:72px;margin-bottom:16px;">&#127881;</div>
-    <h2 style="font-size:24px;font-weight:900;color:white;margin-bottom:8px;">All done, Anish!</h2>
-    <p style="color:rgba(255,255,255,0.5);margin-bottom:24px;">You answered all {{ questions|length }} questions!</p>
-    <button type="submit" style="background:linear-gradient(135deg,#00C896,#00E5AB);color:#0A2E24;border:none;padding:18px 40px;border-radius:50px;font-size:20px;font-weight:900;cursor:pointer;font-family:inherit;width:100%;">See Results!</button>
-  </div>
+<form method="post" action="/quiz/{{ topic["id"] }}/submit" id="qf">
+<input type="hidden" name="next_stage" value="{{ next_stage }}">
+{% for q in questions %}
+<div id="q{{loop.index}}" style="display:{% if loop.first %}block{% else %}none{% endif %};background:#1A1A35;border:1px solid #2A2A4A;border-radius:16px;padding:20px;margin-bottom:12px;">
+<input type="hidden" name="question_ids" value="{{ q['id'] }}">
+<div style="font-size:10px;font-weight:800;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:12px;">{% if q['difficulty']==1 %}Easy{% elif q['difficulty']==2 %}Medium{% else %}Hard{% endif %}</div>
+<div style="font-size:17px;font-weight:800;line-height:1.6;color:white;margin-bottom:16px;">{{ q['question_text'] }}</div>
+{% if q['question_type'] == 'mc' %}
+<input type="hidden" name="answer_{{ q['id'] }}" id="a{{q['id']}}" value="">
+{% for opt,ltr in [(q['option_a'],'A'),(q['option_b'],'B'),(q['option_c'],'C'),(q['option_d'],'D')] if opt %}
+<div onclick="go(this,'{{q['id']}}',{{loop.index}},{{loop.index}})" data-n="{{loop.index}}" style="padding:14px 16px;margin:6px 0;border-radius:12px;border:2px solid #2A2A4A;background:rgba(255,255,255,0.03);font-size:15px;font-weight:700;color:white;cursor:pointer;display:flex;align-items:center;gap:12px;"><span style="width:32px;height:32px;border-radius:50%;background:#2A2A4A;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;">{{ltr}}</span><span>{{opt}}</span></div>
+{% endfor %}
+{% else %}
+<input type="text" name="answer_{{ q['id'] }}" style="width:100%;padding:14px;border-radius:12px;border:2px solid #2A2A4A;font-size:15px;font-weight:700;font-family:inherit;background:rgba(255,255,255,0.05);color:white;margin-bottom:10px;display:block;" placeholder="Type your answer...">
+<div onclick="nx({{loop.index}})" style="padding:14px;border-radius:50px;background:{{color}};color:white;text-align:center;font-size:16px;font-weight:800;cursor:pointer;">Next</div>
+{% endif %}
+</div>
+{% endfor %}
+<div id="done" style="display:none;background:#1A1A35;border:1px solid #2A2A4A;border-radius:16px;padding:40px;text-align:center;">
+<div style="font-size:60px;margin-bottom:12px;">&#127881;</div>
+<div style="font-size:22px;font-weight:900;color:white;margin-bottom:8px;">All done Anish!</div>
+<button type="submit" style="background:linear-gradient(135deg,#00C896,#00E5AB);color:#0A2E24;border:none;padding:16px 40px;border-radius:50px;font-size:18px;font-weight:900;cursor:pointer;font-family:inherit;width:100%;margin-top:16px;">See Results!</button>
+</div>
 </form>
-
-<div style="margin-top:16px;display:flex;gap:10px;">
-  <button type="button" id="prevBtn" onclick="goTo(cur-1)" style="display:none;background:rgba(255,255,255,0.1);color:white;border:1px solid #2A2A4A;padding:10px 20px;border-radius:50px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;">← Prev</button>
-  <a href="/learn/{{ topic["id"] }}" style="background:rgba(255,255,255,0.1);color:white;border:1px solid #2A2A4A;padding:10px 20px;border-radius:50px;font-weight:800;font-size:13px;display:inline-block;">Back to Lesson</a>
+<div style="margin-top:12px;display:flex;gap:10px;">
+<div onclick="bk()" style="background:rgba(255,255,255,0.1);color:white;border:1px solid #2A2A4A;padding:10px 20px;border-radius:50px;font-weight:800;font-size:13px;cursor:pointer;">← Prev</div>
+<a href="/learn/{{ topic['id'] }}" style="color:rgba(255,255,255,0.5);font-size:13px;font-weight:700;text-decoration:none;padding:10px 0;">Back to Lesson</a>
 </div>
-
 <script>
-var T={{ questions|length }},cur=1,busy=false;
-function goTo(n){
-  document.querySelectorAll('.qcard').forEach(function(el){el.style.display='none';});
+var T={{ questions|length }},c=1,busy=false;
+function sh(n){
+  for(var i=1;i<=T;i++){var e=document.getElementById('q'+i);if(e)e.style.display='none';}
   document.getElementById('done').style.display='none';
-  if(n>T){
-    document.getElementById('done').style.display='block';
-    document.getElementById('prog').style.width='100%';
-    document.getElementById('qnum').textContent=T;
-    document.getElementById('prevBtn').style.display='none';
-  } else {
-    cur=n;
-    document.getElementById('qc'+n).style.display='block';
-    document.getElementById('qnum').textContent=n;
-    document.getElementById('prog').style.width=Math.round(((n-1)/T)*100)+'%';
-    document.getElementById('prevBtn').style.display=n>1?'inline-block':'none';
-  }
-  document.getElementById('topbar').scrollIntoView({behavior:'smooth',block:'start'});
+  if(n>T){document.getElementById('done').style.display='block';document.getElementById('pg').style.width='100%';document.getElementById('qn').textContent=T;}
+  else{document.getElementById('q'+n).style.display='block';document.getElementById('qn').textContent=n;document.getElementById('pg').style.width=Math.round((n-1)/T*100)+'%';}
+  window.scrollTo(0,0);
 }
-function pick(btn){
-  if(busy)return;
-  if(btn.classList.contains('chosen'))return;
-  busy=true;
-  document.querySelectorAll('.opt').forEach(function(b){b.onclick=null;b.style.pointerEvents='none';});
-  var qid=btn.getAttribute('data-qid');
-  var n=parseInt(btn.getAttribute('data-n'));
-  var val=btn.getAttribute('data-val');
-  document.getElementById('ans'+qid).value=val;
-  btn.classList.add('chosen');
-  goTo(n+1);
+function go(el,qid,optN,qN){
+  if(busy)return;busy=true;
+  var card=document.getElementById('q'+c);
+  card.querySelectorAll('[onclick^="go"]').forEach(function(b){b.onclick=null;b.style.pointerEvents='none';});
+  document.getElementById('a'+qid).value=el.querySelector('span:last-child').textContent;
+  el.style.borderColor='#6C63FF';el.style.background='rgba(108,99,255,0.25)';
+  el.querySelector('span').style.background='#6C63FF';el.querySelector('span').style.color='white';
+  c++;busy=false;sh(c);
 }
-goTo(1);
+function nx(n){if(busy)return;c=n+1;sh(c);}
+function bk(){if(c>1){c--;sh(c);}}
 </script>
 {% endblock %}
