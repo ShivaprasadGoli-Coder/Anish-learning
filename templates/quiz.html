@@ -61,6 +61,9 @@
 var total = {{ questions|length }};
 var busy = false;
 window.onload = function() {
+  for (var i = 1; i <= total; i++) {
+    document.getElementById("qc" + i).style.display = "none";
+  }
   document.getElementById("qc1").style.display = "block";
   document.getElementById("prog").style.width = "0%";
   document.getElementById("qnum").textContent = "1";
@@ -73,7 +76,7 @@ function pick(btn) {
   var val = btn.getAttribute("data-val");
   document.getElementById("ans" + qid).value = val;
   btn.closest(".qcard").querySelectorAll(".opt").forEach(function(b) {
-    b.setAttribute("disabled","true");
+    b.setAttribute("disabled", "true");
     b.onclick = null;
   });
   btn.classList.add("sel");
@@ -85,10 +88,10 @@ function advance(n) {
   if (cur) cur.style.display = "none";
   var pct = Math.round((n / total) * 100);
   document.getElementById("prog").style.width = pct + "%";
-  document.getElementById("qnum").textContent = Math.min(n + 1, total);
   if (n < total) {
     var next = document.getElementById("qc" + (n + 1));
     if (next) next.style.display = "block";
+    document.getElementById("qnum").textContent = n + 1;
   } else {
     document.getElementById("prog").style.width = "100%";
     document.getElementById("done").style.display = "block";
