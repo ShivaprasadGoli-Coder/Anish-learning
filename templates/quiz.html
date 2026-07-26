@@ -74,11 +74,8 @@ function pick(btn) {
   });
   btn.classList.add("sel");
   btn.querySelector(".ltr").style.background = "#6C63FF";
-  answered = true;
-  setTimeout(function() {
-    answered = false;
-    advance(n);
-  }, 500);
+  card.querySelectorAll(".opt").forEach(function(b){ b.onclick=null; });
+  setTimeout(function() { advance(n); }, 500);
 }
 
 function advance(n) {
