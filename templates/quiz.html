@@ -3,8 +3,8 @@
 {% block content %}
 {% set color = COLORS.get(topic["subject"],"#6C63FF") %}
 <style>
-#quiz-wrap .qcard { display: none !important; }
-#quiz-wrap .qcard.visible { display: block !important; }
+#quiz-wrap .qcard { display: none; }
+#quiz-wrap .qcard.visible { display: block; }
 .opt { width:100%; padding:16px 18px; margin:8px 0; border-radius:14px; border:2px solid #2A2A4A; background:rgba(255,255,255,0.03); font-size:16px; font-weight:700; cursor:pointer; text-align:left; font-family:inherit; color:white; display:flex; align-items:center; gap:12px; }
 .opt.chosen { border-color: {{ color }}; background: rgba(108,99,255,0.2); }
 .ltr { width:36px; height:36px; border-radius:50%; background:#2A2A4A; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:14px; flex-shrink:0; color:white; }
