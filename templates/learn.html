@@ -1,36 +1,923 @@
 {% extends "base.html" %}
 {% block title %}Learn — {{ topic["title"] }}{% endblock %}
 {% block content %}
-{% set color = COLORS.get(topic["subject"],"#4F46E5") %}
-{% set emoji = EMOJIS.get(topic["subject"],"X") %}
-<div class="card-glass" style="padding:24px;margin-bottom:16px;">
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-    <span style="font-size:36px;">{{ emoji }}</span>
-    <div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;">{{ topic["subject"] }} - {{ topic["section"] }}</div>
-      <h1 style="font-size:20px;font-weight:900;margin-top:4px;">{{ topic["title"] }}</h1>
+{% set color = COLORS.get(topic["subject"],"#6C63FF") %}
+{% set emoji = EMOJIS.get(topic["subject"],"📖") %}
+
+<style>
+/* ── LESSON CONTAINER ─────────────────────────── */
+.lesson-hero{background:linear-gradient(135deg,{{ color }}33,{{ color }}11);border:1px solid {{ color }}44;border-radius:24px;padding:28px;margin-bottom:20px;text-align:center;}
+.lesson-hero .subject-pill{display:inline-block;background:{{ color }}33;color:{{ color }};border:1px solid {{ color }}55;border-radius:50px;padding:4px 14px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+.lesson-hero h1{font-size:24px;font-weight:900;color:white;margin-bottom:8px;font-family:'Space Grotesk',sans-serif;}
+.lesson-hero p{color:rgba(255,255,255,0.6);font-size:14px;}
+
+/* ── STEP SYSTEM ──────────────────────────────── */
+.step-dots{display:flex;justify-content:center;gap:8px;margin-bottom:24px;}
+.step-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.2);transition:all 0.3s;cursor:pointer;}
+.step-dot.active{background:{{ color }};transform:scale(1.3);}
+.step-dot.done{background:{{ color }}88;}
+
+.lesson-step{display:none;animation:fadeSlide 0.4s ease;}
+.lesson-step.active{display:block;}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.step-card{background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:24px;margin-bottom:16px;}
+.step-num{display:inline-flex;align-items:center;gap:8px;background:{{ color }}22;border:1px solid {{ color }}44;border-radius:50px;padding:6px 14px;font-size:12px;font-weight:800;color:{{ color }};margin-bottom:16px;}
+.step-title{font-size:20px;font-weight:900;color:white;margin-bottom:12px;font-family:'Space Grotesk',sans-serif;}
+.step-text{font-size:15px;line-height:1.8;color:rgba(255,255,255,0.8);margin-bottom:16px;}
+.step-text strong{color:white;}
+
+/* ── INTERACTIVE ELEMENTS ─────────────────────── */
+.interactive-zone{background:rgba(255,255,255,0.04);border:2px dashed {{ color }}44;border-radius:16px;padding:20px;margin:16px 0;text-align:center;}
+.interactive-zone .hint{font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+
+/* Place value chart */
+.pv-chart{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:12px 0;}
+.pv-col{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 8px;text-align:center;min-width:60px;cursor:pointer;transition:all 0.2s;}
+.pv-col:hover,.pv-col.lit{background:{{ color }}33;border-color:{{ color }};transform:translateY(-4px);}
+.pv-col .col-name{font-size:9px;font-weight:800;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:6px;}
+.pv-col .col-val{font-size:22px;font-weight:900;color:white;}
+.pv-col .col-worth{font-size:10px;color:{{ color }};margin-top:4px;font-weight:700;}
+
+/* Number line */
+.num-line{position:relative;height:60px;margin:20px 10px;}
+.num-line-bar{position:absolute;top:28px;left:0;right:0;height:3px;background:rgba(255,255,255,0.2);border-radius:2px;}
+.num-line-marker{position:absolute;top:0;transform:translateX(-50%);text-align:center;cursor:pointer;}
+.num-line-marker .tick{width:2px;height:20px;background:rgba(255,255,255,0.4);margin:0 auto;margin-top:18px;}
+.num-line-marker .label{font-size:12px;font-weight:800;color:rgba(255,255,255,0.7);margin-top:4px;}
+.num-line-marker.highlight .tick{background:{{ color }};height:28px;margin-top:14px;}
+.num-line-marker.highlight .label{color:{{ color }};}
+
+/* Fraction bar */
+.frac-bar{display:flex;gap:3px;height:40px;border-radius:8px;overflow:hidden;margin:12px 0;}
+.frac-piece{flex:1;background:{{ color }}44;border:1px solid {{ color }}66;border-radius:4px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:rgba(255,255,255,0.5);}
+.frac-piece.filled{background:{{ color }};color:white;}
+
+/* Shape diagram */
+.shape-box{margin:12px auto;display:flex;justify-content:center;}
+
+/* Emoji flow */
+.emoji-flow{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;font-size:24px;margin:16px 0;}
+.emoji-flow .arrow{font-size:18px;color:rgba(255,255,255,0.4);}
+.emoji-flow .step-emoji{background:rgba(255,255,255,0.06);border-radius:12px;padding:10px 14px;transition:all 0.3s;cursor:pointer;border:1px solid transparent;}
+.emoji-flow .step-emoji:hover,.emoji-flow .step-emoji.active{background:{{ color }}33;border-color:{{ color }};transform:scale(1.1);}
+.emoji-flow .step-emoji .label{font-size:11px;color:rgba(255,255,255,0.6);margin-top:4px;font-weight:700;}
+
+/* Example cards */
+.example-row{display:flex;gap:10px;margin:12px 0;flex-wrap:wrap;}
+.ex-card{flex:1;min-width:140px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;cursor:pointer;transition:all 0.2s;text-align:center;}
+.ex-card:hover,.ex-card.revealed{background:{{ color }}22;border-color:{{ color }}55;}
+.ex-card .question{font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:8px;}
+.ex-card .answer{font-size:18px;font-weight:900;color:{{ color }};display:none;}
+.ex-card.revealed .answer{display:block;}
+.ex-card .tap-hint{font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;}
+.ex-card.revealed .tap-hint{display:none;}
+
+/* Rule box */
+.rule-highlight{background:linear-gradient(135deg,{{ color }}22,{{ color }}11);border-left:4px solid {{ color }};border-radius:0 14px 14px 0;padding:16px 20px;margin:16px 0;}
+.rule-highlight .rule-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:{{ color }};margin-bottom:8px;}
+.rule-highlight .rule-text{font-size:16px;font-weight:800;color:white;line-height:1.6;}
+
+/* Progress */
+.lesson-progress{background:rgba(255,255,255,0.05);border-radius:50px;height:6px;margin-bottom:20px;overflow:hidden;}
+.lesson-progress-fill{height:100%;background:linear-gradient(90deg,{{ color }},{{ color }}88);border-radius:50px;transition:width 0.4s;}
+
+/* Navigation */
+.step-nav{display:flex;gap:10px;margin-top:20px;}
+.nav-btn{flex:1;padding:14px;border-radius:14px;border:none;font-size:15px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all 0.2s;}
+.nav-btn:hover{transform:translateY(-2px);}
+.btn-prev{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);}
+.btn-next{background:{{ color }};color:white;box-shadow:0 4px 20px {{ color }}44;}
+.btn-next:disabled{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* Quiz unlock */
+.quiz-unlock{background:linear-gradient(135deg,#00C896,#00E5AB);border-radius:20px;padding:28px;text-align:center;margin-top:20px;display:none;}
+.quiz-unlock.visible{display:block;animation:fadeSlide 0.5s ease;}
+.quiz-unlock h2{font-size:22px;font-weight:900;color:#0A2E24;margin-bottom:8px;}
+.quiz-unlock p{color:rgba(0,46,36,0.7);font-size:14px;margin-bottom:20px;}
+.quiz-unlock a{background:#0A2E24;color:#00C896;padding:16px 36px;border-radius:50px;font-size:18px;font-weight:900;text-decoration:none;display:inline-block;transition:all 0.2s;}
+.quiz-unlock a:hover{transform:scale(1.05);}
+
+/* Tip box */
+.tip-box{background:rgba(251,183,36,0.1);border:1px solid rgba(251,183,36,0.3);border-radius:14px;padding:14px 18px;margin:12px 0;display:flex;gap:12px;align-items:flex-start;}
+.tip-box .tip-icon{font-size:20px;flex-shrink:0;}
+.tip-box .tip-text{font-size:14px;color:rgba(255,255,255,0.8);line-height:1.7;}
+
+/* Warning box */
+.warn-box{background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.3);border-radius:14px;padding:14px 18px;margin:12px 0;display:flex;gap:12px;align-items:flex-start;}
+.warn-box .warn-icon{font-size:20px;flex-shrink:0;}
+.warn-box .warn-text{font-size:14px;color:rgba(255,255,255,0.8);line-height:1.7;}
+
+/* Worked example */
+.worked{background:#0D0D1F;border:1px solid #2A2A4A;border-radius:14px;padding:16px;margin:12px 0;font-family:'Courier New',monospace;}
+.worked .worked-title{font-size:11px;font-weight:800;color:#00C896;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-family:'Nunito',sans-serif;}
+.worked .worked-line{font-size:14px;color:rgba(255,255,255,0.8);margin:4px 0;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.worked .worked-line.result{color:#00C896;font-weight:900;font-size:16px;border:none;}
+.worked .worked-line .step-label{color:rgba(255,255,255,0.3);font-size:12px;margin-right:8px;}
+
+/* Celebration */
+.celebrate{display:none;text-align:center;padding:20px;}
+.celebrate.show{display:block;animation:fadeSlide 0.4s ease;}
+</style>
+
+<!-- HERO -->
+<div class="lesson-hero">
+  <div class="subject-pill">{{ emoji }} {{ topic["subject"] }}</div>
+  <h1>{{ topic["title"] }}</h1>
+  <p>{{ topic["section"] }} · Learn first, then answer questions</p>
+</div>
+
+<!-- PROGRESS BAR -->
+<div class="lesson-progress">
+  <div class="lesson-progress-fill" id="lessonProgress" style="width:0%"></div>
+</div>
+
+<!-- STEP DOTS -->
+<div class="step-dots" id="stepDots"></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- LESSON STEPS — rendered from topic lesson_html  -->
+<!-- ═══════════════════════════════════════════════ -->
+
+{% if topic["lesson_html"] %}
+
+<!-- We parse the lesson into interactive steps using JS -->
+<div id="lessonContainer">
+
+  <!-- STEP 1: INTRODUCTION (always shown first) -->
+  <div class="lesson-step active" id="step-1">
+    <div class="step-card">
+      <div class="step-num">📖 Step 1 · Introduction</div>
+      <div class="step-title">What is {{ topic["title"] }}?</div>
+
+      <!-- Render the first lesson block -->
+      <div id="intro-content">
+        {{ topic["lesson_html"] | safe }}
+      </div>
+    </div>
+
+    <!-- Emoji flow interaction -->
+    <div class="step-card">
+      <div class="step-num">👆 Try It</div>
+      <div class="step-title">Tap each step to explore</div>
+      <div class="emoji-flow" id="emojiFlow">
+        <!-- Filled by JS based on topic -->
+      </div>
+      <div id="emojiExplain" style="min-height:40px;text-align:center;color:rgba(255,255,255,0.6);font-size:14px;margin-top:12px;"></div>
     </div>
   </div>
-  <span style="background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;">{{ q_count }} practice questions</span>
-</div>
-<div class="card">
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:2px solid #EEF2FF;">
-    <span style="font-size:24px;">X</span>
-    <h2 style="font-size:18px;font-weight:900;color:#302b63;">Read the lesson first!</h2>
+
+  <!-- STEP 2: KEY RULES -->
+  <div class="lesson-step" id="step-2">
+    <div class="step-card">
+      <div class="step-num">📏 Step 2 · Key Rules</div>
+      <div class="step-title">Remember These Rules</div>
+
+      <div class="rule-highlight">
+        <div class="rule-label">🔑 The Golden Rule</div>
+        <div class="rule-text" id="goldenRule">Loading...</div>
+      </div>
+
+      <div class="tip-box">
+        <div class="tip-icon">💡</div>
+        <div class="tip-text" id="tipText">Loading tip...</div>
+      </div>
+
+      <div class="warn-box">
+        <div class="warn-icon">⚠️</div>
+        <div class="warn-text" id="warnText">Loading warning...</div>
+      </div>
+    </div>
   </div>
-  {% if topic["lesson_html"] %}
-    {{ topic["lesson_html"] | safe }}
-  {% else %}
-    <div class="lesson-block definition"><h3>{{ topic["title"] }}</h3><p>Study this topic then practice below.</p></div>
-  {% endif %}
+
+  <!-- STEP 3: INTERACTIVE DIAGRAM -->
+  <div class="lesson-step" id="step-3">
+    <div class="step-card">
+      <div class="step-num">🎮 Step 3 · Interactive</div>
+      <div class="step-title" id="diagramTitle">Explore the Diagram</div>
+      <div id="diagramZone" class="interactive-zone">
+        <div class="hint">👇 Tap to interact</div>
+        <div id="diagramContent">Loading diagram...</div>
+      </div>
+      <div id="diagramExplain" style="text-align:center;font-size:14px;color:rgba(255,255,255,0.6);margin-top:12px;min-height:30px;"></div>
+    </div>
+  </div>
+
+  <!-- STEP 4: WORKED EXAMPLES -->
+  <div class="lesson-step" id="step-4">
+    <div class="step-card">
+      <div class="step-num">✏️ Step 4 · Worked Examples</div>
+      <div class="step-title">Watch How It's Done</div>
+      <div id="workedExamples">Loading examples...</div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">🧪 Try It Yourself</div>
+      <div class="step-title">Tap each card to reveal the answer</div>
+      <div class="example-row" id="tryCards"></div>
+    </div>
+  </div>
+
+  <!-- STEP 5: READY? -->
+  <div class="lesson-step" id="step-5">
+    <div class="step-card" style="text-align:center;padding:40px 24px;">
+      <div style="font-size:60px;margin-bottom:16px;">🧠</div>
+      <div class="step-title">You're ready, Anish!</div>
+      <p style="color:rgba(255,255,255,0.6);font-size:15px;line-height:1.8;margin-bottom:20px;">
+        You've learned <strong style="color:white;">{{ topic["title"] }}</strong>.<br>
+        Now put your knowledge to the test!
+      </p>
+      <div style="background:rgba(0,200,150,0.1);border:1px solid rgba(0,200,150,0.3);border-radius:14px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:13px;font-weight:800;color:#00C896;margin-bottom:8px;">📋 QUIZ DETAILS</div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.7);">{{ q_count }} questions · Easy → Medium → Hard</div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.7);">Take your time · Read carefully</div>
+      </div>
+      <a href="/quiz/{{ topic['id'] }}" style="background:linear-gradient(135deg,#00C896,#00E5AB);color:#0A2E24;padding:18px 48px;border-radius:50px;font-size:20px;font-weight:900;text-decoration:none;display:inline-block;box-shadow:0 4px 20px rgba(0,200,150,0.4);">
+        🚀 Start Quiz!
+      </a>
+    </div>
+  </div>
+
 </div>
-{% if not parent_mode %}
-<div class="card" style="text-align:center;padding:28px;">
-  <div style="font-size:44px;margin-bottom:12px;">X</div>
-  <h2 style="font-size:20px;font-weight:900;color:#302b63;margin-bottom:8px;">Ready to practise?</h2>
-  <p style="color:#666;margin-bottom:20px;font-size:14px;">5 questions — easy, medium and hard. Take your time!</p>
-  <a href="/quiz/{{ topic["id"] }}" class="btn btn-p btn-lg">Start Questions</a>
+
+<!-- NAVIGATION -->
+<div class="step-nav">
+  <button class="nav-btn btn-prev" id="prevBtn" onclick="changeStep(-1)" style="display:none">← Back</button>
+  <button class="nav-btn btn-next" id="nextBtn" onclick="changeStep(1)">Next →</button>
+</div>
+
+{% else %}
+<!-- Fallback if no lesson content -->
+<div class="step-card" style="text-align:center;padding:40px;">
+  <div style="font-size:48px;margin-bottom:12px;">📖</div>
+  <h2 style="color:white;margin-bottom:8px;">{{ topic["title"] }}</h2>
+  <p style="color:rgba(255,255,255,0.5);margin-bottom:24px;">Study this topic, then take the quiz.</p>
+  <a href="/quiz/{{ topic['id'] }}" class="btn btn-g btn-lg">Start Quiz →</a>
 </div>
 {% endif %}
-<div style="margin-top:12px;"><a href="/subject/{{ topic["subject"] }}" class="btn btn-w">Back to {{ topic["subject"] }}</a></div>
+
+<div style="margin-top:20px;">
+  <a href="/subject/{{ topic['subject'] }}" style="color:rgba(255,255,255,0.5);font-size:13px;font-weight:700;">← Back to {{ topic["subject"] }}</a>
+</div>
+
+<script>
+var currentStep = 1;
+var totalSteps = 5;
+var topicTitle = {{ topic["title"] | tojson }};
+var topicSubject = {{ topic["subject"] | tojson }};
+var color = {{ color | tojson }};
+
+// ── TOPIC-SPECIFIC CONTENT ─────────────────────────────────────────────────
+var TOPIC_DATA = {
+
+  "Place Value of Digits": {
+    emoji_flow: [
+      {e:"1️⃣", label:"Ones", explain:"The rightmost digit. 1 one = 1"},
+      {e:"🔟", label:"Tens", explain:"2nd from right. 1 ten = 10"},
+      {e:"💯", label:"Hundreds", explain:"3rd from right. 1 hundred = 100"},
+      {e:"💎", label:"Thousands", explain:"4th from right. 1 thousand = 1,000"},
+      {e:"🌟", label:"Ten-thousands", explain:"5th from right. 1 ten-thousand = 10,000"},
+      {e:"🚀", label:"Millions", explain:"7th from right. 1 million = 1,000,000"},
+    ],
+    golden_rule: "Every digit has a VALUE based on its POSITION. Count from the RIGHT: ones → tens → hundreds → thousands...",
+    tip: "Remember: ZERO is a placeholder! In 30,405 the zero holds the hundreds column.",
+    warn: "Don't confuse the DIGIT with its VALUE. In 384, the digit 3 has a VALUE of 300!",
+    diagram_title: "Tap Each Column to See Its Value",
+    diagram: "place_value",
+    number: [3,8,4,7,2,6,5],
+    columns: ["M","HTh","TTh","Th","H","T","O"],
+    worths: ["3,000,000","800,000","40,000","7,000","200","60","5"],
+    worked: [
+      {q:"What is the value of 7 in 47,382?", steps:["Write the number: 4 7 , 3 8 2","Count from right: 2=ones, 8=tens, 3=hundreds, 7=thousands","The 7 is in the THOUSANDS column"], result:"Value = 7,000 ✓"},
+      {q:"Write 506,040 in words.", steps:["5 = five hundred thousands","0 = zero ten-thousands (skip)","6 = six thousands","0 = zero hundreds (skip)","4 = four tens"], result:"Five hundred and six thousand and forty ✓"},
+    ],
+    try_cards: [
+      {q:"Value of 4 in 24,836?", a:"4,000"},
+      {q:"Value of 8 in 284,736?", a:"80,000"},
+      {q:"Which column is 5 in 350,284?", a:"Ten-thousands"},
+    ]
+  },
+
+  "Rounding Numbers": {
+    emoji_flow: [
+      {e:"👀", label:"Find digit", explain:"Find the digit in the column you're rounding to"},
+      {e:"👉", label:"Look right", explain:"Look at the digit immediately to the RIGHT"},
+      {e:"⬇️", label:"0-4: Round down", explain:"If right digit is 0,1,2,3,4 → keep digit the same"},
+      {e:"⬆️", label:"5-9: Round up", explain:"If right digit is 5,6,7,8,9 → add 1 to digit"},
+      {e:"0️⃣", label:"Replace", explain:"Replace all digits to the right with zeros"},
+    ],
+    golden_rule: "Look at the digit to the RIGHT of where you're rounding. 0-4 = round DOWN, 5-9 = round UP!",
+    tip: "A memory trick: 5 and above → GIVE IT A SHOVE (round up). Below 5 → LET IT DIVE (round down).",
+    warn: "Don't round the wrong digit! If rounding to nearest 100, look at the TENS digit (not the hundreds).",
+    diagram_title: "Interactive Rounding — Tap to Round",
+    diagram: "rounding",
+    worked: [
+      {q:"Round 47,382 to nearest 1,000", steps:["Find thousands digit: 7","Look at the hundreds digit: 3","3 is less than 5 → round DOWN","Keep the 7, replace rest with zeros"], result:"47,000 ✓"},
+      {q:"Round 6,850 to nearest 100", steps:["Find hundreds digit: 8","Look at the tens digit: 5","5 ≥ 5 → round UP","8 becomes 9, replace rest with zeros"], result:"6,900 ✓"},
+    ],
+    try_cards: [
+      {q:"Round 3,847 to nearest 1,000?", a:"4,000"},
+      {q:"Round 28,364 to nearest 10,000?", a:"30,000"},
+      {q:"Round 0.847 to nearest tenth?", a:"0.8"},
+    ]
+  },
+
+  "Negative Numbers": {
+    emoji_flow: [
+      {e:"🥶", label:"Very cold", explain:"-10°C is colder than -5°C. Lower number = colder!"},
+      {e:"❄️", label:"Freezing", explain:"0°C = freezing point of water"},
+      {e:"☀️", label:"Warm", explain:"+20°C is a warm day"},
+      {e:"🔥", label:"Hot", explain:"+40°C is very hot!"},
+    ],
+    golden_rule: "On a number line: negative numbers are to the LEFT of zero. The further left, the smaller (colder) the number!",
+    tip: "Adding a negative = going LEFT. Subtracting a negative = going RIGHT (two negatives = positive)!",
+    warn: "-10 is LESS THAN -5 (even though 10 > 5 as positives). Think of a thermometer!",
+    diagram_title: "Number Line — Tap to Explore",
+    diagram: "number_line",
+    worked: [
+      {q:"What is -3 + 7?", steps:["Start at -3 on the number line","Move 7 places to the RIGHT","-3, -2, -1, 0, 1, 2, 3, 4"], result:"Answer = 4 ✓"},
+      {q:"Temperature was -8°C. Rose by 12°C. New temperature?", steps:["-8 + 12 =","Start at -8, move 12 right","= 4°C"], result:"4°C ✓"},
+    ],
+    try_cards: [
+      {q:"-6 + 10 = ?", a:"4"},
+      {q:"-3 - 5 = ?", a:"-8"},
+      {q:"Which is colder: -15 or -8?", a:"-15"},
+    ]
+  },
+
+  "Multiplication": {
+    emoji_flow: [
+      {e:"📦", label:"Groups", explain:"Multiplication = equal groups. 3×4 = three groups of four"},
+      {e:"➕", label:"Add groups", explain:"3×4 = 4+4+4 = 12"},
+      {e:"🔢", label:"Grid method", explain:"Split into parts: 47×8 = 40×8 + 7×8"},
+      {e:"✅", label:"Add results", explain:"320 + 56 = 376"},
+    ],
+    golden_rule: "Use the GRID METHOD: split numbers into parts, multiply each part, then add them together!",
+    tip: "Always estimate first! 47×8 ≈ 50×8 = 400. Your answer should be close to 400.",
+    warn: "Don't forget to add ALL the partial products in the grid method!",
+    diagram_title: "Grid Method — Tap to Build",
+    diagram: "grid_mult",
+    worked: [
+      {q:"Calculate 47 × 8", steps:["Split 47: 40 + 7","40 × 8 = 320","7 × 8 = 56","Add: 320 + 56"], result:"= 376 ✓"},
+      {q:"Calculate 124 × 36", steps:["Split: 100 + 20 + 4","100×36=3,600","20×36=720","4×36=144","Add: 3,600+720+144"], result:"= 4,464 ✓"},
+    ],
+    try_cards: [
+      {q:"63 × 7 = ?", a:"441"},
+      {q:"84 × 25 = ?", a:"2,100"},
+      {q:"Estimate 389 × 51?", a:"≈ 20,000"},
+    ]
+  },
+
+  "Division": {
+    emoji_flow: [
+      {e:"🍕", label:"Share equally", explain:"Division = sharing into equal groups"},
+      {e:"➗", label:"Divide", explain:"264 ÷ 8 = how many 8s fit into 264?"},
+      {e:"🔄", label:"Bus stop", explain:"Use the bus stop method for bigger numbers"},
+      {e:"📝", label:"Remainder", explain:"If it doesn't divide exactly, there's a remainder (r)"},
+    ],
+    golden_rule: "Division is the INVERSE of multiplication. If 8 × 33 = 264, then 264 ÷ 8 = 33!",
+    tip: "Always check your answer by multiplying back: 33 × 8 = 264 ✓",
+    warn: "Don't forget remainders! 17 ÷ 5 = 3 remainder 2 (NOT just 3).",
+    diagram_title: "Bus Stop Method — Tap Each Step",
+    diagram: "bus_stop",
+    worked: [
+      {q:"Calculate 264 ÷ 8", steps:["How many 8s in 2? → 0, carry 2","How many 8s in 26? → 3, remainder 2","How many 8s in 24? → 3","Result: 033"], result:"= 33 ✓"},
+    ],
+    try_cards: [
+      {q:"336 ÷ 12 = ?", a:"28"},
+      {q:"4,872 ÷ 6 = ?", a:"812"},
+      {q:"2,847 ÷ 9 = ? (remainder?)", a:"316 r3"},
+    ]
+  },
+
+  "BODMAS Order of Operations": {
+    emoji_flow: [
+      {e:"🔵", label:"B — Brackets", explain:"Always do brackets FIRST: (3+4)×2 = 7×2"},
+      {e:"⭕", label:"O — Orders", explain:"Powers and roots: 3² = 9"},
+      {e:"➗", label:"D/M — Divide/Multiply", explain:"Left to right: 6÷2×3 = 3×3 = 9"},
+      {e:"➕", label:"A/S — Add/Subtract", explain:"Left to right: 8-3+2 = 5+2 = 7"},
+    ],
+    golden_rule: "BODMAS = Brackets → Orders → Division/Multiplication → Addition/Subtraction. Always work in this order!",
+    tip: "D and M have EQUAL priority — do them left to right. Same for A and S.",
+    warn: "3 + 4 × 2 ≠ 14! Multiplication comes first: 3 + 8 = 11. Many people make this mistake!",
+    diagram_title: "BODMAS in Action — Tap Each Step",
+    diagram: "bodmas",
+    worked: [
+      {q:"Calculate: 3 + 4 × 2", steps:["B: no brackets","O: no orders","D/M: 4 × 2 = 8","A/S: 3 + 8"], result:"= 11 ✓ (NOT 14!)"},
+      {q:"Calculate: (3 + 4)² - 5", steps:["B: (3+4) = 7","O: 7² = 49","A/S: 49 - 5"], result:"= 44 ✓"},
+    ],
+    try_cards: [
+      {q:"20 - 8 ÷ 4 = ?", a:"18"},
+      {q:"(5+3) × 2 = ?", a:"16"},
+      {q:"2² + 3 × 4 = ?", a:"16"},
+    ]
+  },
+
+  "Factors, HCF, Multiples & LCM": {
+    emoji_flow: [
+      {e:"🔧", label:"Factors", explain:"Factors DIVIDE exactly into a number. Factors of 12: 1,2,3,4,6,12"},
+      {e:"🔗", label:"Multiples", explain:"Multiples are in a number's times table. Multiples of 4: 4,8,12,16..."},
+      {e:"🏆", label:"HCF", explain:"Highest Common Factor = largest factor shared by both numbers"},
+      {e:"🎯", label:"LCM", explain:"Lowest Common Multiple = smallest multiple shared by both numbers"},
+    ],
+    golden_rule: "HCF = highest factor they SHARE. LCM = smallest multiple they SHARE. Product of two numbers = HCF × LCM!",
+    tip: "HCF is useful for SIMPLIFYING fractions. LCM is useful for ADDING fractions.",
+    warn: "Don't mix up HCF and LCM! HCF is always ≤ both numbers. LCM is always ≥ both numbers.",
+    diagram_title: "Factor Trees — Tap to Explore",
+    diagram: "factor_tree",
+    worked: [
+      {q:"Find HCF of 18 and 24", steps:["Factors of 18: 1,2,3,6,9,18","Factors of 24: 1,2,3,4,6,8,12,24","Common factors: 1,2,3,6","Highest common factor: 6"], result:"HCF = 6 ✓"},
+      {q:"Find LCM of 4 and 6", steps:["Multiples of 4: 4,8,12,16...","Multiples of 6: 6,12,18...","First common multiple: 12"], result:"LCM = 12 ✓"},
+    ],
+    try_cards: [
+      {q:"HCF of 12 and 18?", a:"6"},
+      {q:"LCM of 3 and 5?", a:"15"},
+      {q:"Factors of 20?", a:"1,2,4,5,10,20"},
+    ]
+  },
+
+  "Understanding & Simplifying Fractions": {
+    emoji_flow: [
+      {e:"🍕", label:"Whole pizza", explain:"1 = one whole"},
+      {e:"🍕🍕", label:"1/2 = half", explain:"Slice into 2 equal pieces, take 1"},
+      {e:"🍕", label:"3/4 = three quarters", explain:"Slice into 4 equal pieces, take 3"},
+      {e:"✂️", label:"Simplify", explain:"3/6 = 1/2 (divide top AND bottom by HCF)"},
+    ],
+    golden_rule: "To SIMPLIFY a fraction: find the HCF of top and bottom, then divide both by it!",
+    tip: "Equivalent fractions: multiply or divide top AND bottom by the same number. 1/2 = 2/4 = 4/8 = 50/100",
+    warn: "When simplifying, divide BOTH numerator AND denominator by the same number!",
+    diagram_title: "Fraction Bar — Tap to Fill",
+    diagram: "fraction_bar",
+    worked: [
+      {q:"Simplify 6/8", steps:["Find HCF of 6 and 8","HCF = 2","6÷2=3, 8÷2=4"], result:"= 3/4 ✓"},
+      {q:"Find 3/4 of 48", steps:["Divide by denominator: 48÷4=12","Multiply by numerator: 12×3"], result:"= 36 ✓"},
+    ],
+    try_cards: [
+      {q:"Simplify 12/16", a:"3/4"},
+      {q:"3/5 of 35 = ?", a:"21"},
+      {q:"Which is bigger: 3/4 or 2/3?", a:"3/4"},
+    ]
+  },
+
+  "Area & Perimeter": {
+    emoji_flow: [
+      {e:"📏", label:"Perimeter", explain:"Perimeter = distance AROUND the outside. Add all sides!"},
+      {e:"⬛", label:"Area", explain:"Area = space INSIDE. Count the squares!"},
+      {e:"📐", label:"Rectangle", explain:"Area = length × width. Perimeter = 2(l+w)"},
+      {e:"🔺", label:"Triangle", explain:"Area = ½ × base × height"},
+      {e:"⭕", label:"Circle", explain:"Area = πr². Circumference = 2πr"},
+    ],
+    golden_rule: "AREA is measured in square units (cm², m²). PERIMETER is measured in normal units (cm, m).",
+    tip: "Remember: Area = surface inside. Perimeter = fence around the outside.",
+    warn: "Don't mix up area and perimeter! A 4×6 rectangle: area=24cm², perimeter=20cm.",
+    diagram_title: "Interactive Shape — Tap to Calculate",
+    diagram: "shape_area",
+    worked: [
+      {q:"Rectangle 8cm × 5cm. Area and perimeter?", steps:["Area = 8 × 5 = 40 cm²","Perimeter = 2×(8+5) = 2×13"], result:"Area=40cm², Perimeter=26cm ✓"},
+      {q:"Triangle: base 10cm, height 6cm. Area?", steps:["Area = ½ × base × height","= ½ × 10 × 6","= ½ × 60"], result:"= 30 cm² ✓"},
+    ],
+    try_cards: [
+      {q:"Square side 7cm. Perimeter?", a:"28cm"},
+      {q:"Rectangle 12×4. Area?", a:"48cm²"},
+      {q:"Triangle base 8, height 5. Area?", a:"20cm²"},
+    ]
+  },
+
+  "Angles & Shapes": {
+    emoji_flow: [
+      {e:"↗️", label:"Acute", explain:"Acute angle: less than 90°. Sharp!"},
+      {e:"📐", label:"Right", explain:"Right angle: exactly 90°. Like a corner!"},
+      {e:"↙️", label:"Obtuse", explain:"Obtuse angle: between 90° and 180°"},
+      {e:"⬅️", label:"Straight", explain:"Straight line: exactly 180°"},
+      {e:"🔄", label:"Reflex", explain:"Reflex angle: more than 180°"},
+    ],
+    golden_rule: "Angles in a triangle = 180°. Angles in a quadrilateral = 360°. Angles on a straight line = 180°.",
+    tip: "For regular polygons: each interior angle = (n-2)×180 ÷ n, where n = number of sides.",
+    warn: "Don't assume all triangles look the same! Scalene, isosceles and equilateral are all different.",
+    diagram_title: "Angle Explorer — Tap Each Type",
+    diagram: "angles",
+    worked: [
+      {q:"Triangle angles: 47° and 63°. Find third.", steps:["Angles in triangle = 180°","47 + 63 = 110°","180 - 110"], result:"= 70° ✓"},
+      {q:"Interior angle of regular hexagon?", steps:["Sum = (6-2)×180 = 720°","Each angle = 720 ÷ 6"], result:"= 120° ✓"},
+    ],
+    try_cards: [
+      {q:"Exterior angle of regular octagon?", a:"45°"},
+      {q:"Angles in a quadrilateral sum to?", a:"360°"},
+      {q:"Triangle: 55°, 80°, third angle?", a:"45°"},
+    ]
+  },
+
+  "Algebra & Sequences": {
+    emoji_flow: [
+      {e:"📦", label:"Variable", explain:"A letter (like x or n) stands for an unknown number"},
+      {e:"⚖️", label:"Equation", explain:"Both sides must balance: 2x+3=11 means 2x=8, x=4"},
+      {e:"📈", label:"Sequence", explain:"A pattern of numbers following a rule"},
+      {e:"🔢", label:"nth term", explain:"A formula to find ANY term: nth term = 3n+2"},
+    ],
+    golden_rule: "To solve an equation: whatever you do to one side, do the SAME to the other side!",
+    tip: "For arithmetic sequences: nth term = first term + (n-1) × common difference.",
+    warn: "Always check your answer by substituting back in: if 2x+3=11 and x=4, then 2(4)+3=11 ✓",
+    diagram_title: "Balance Scales — Tap to Solve",
+    diagram: "algebra_balance",
+    worked: [
+      {q:"Solve: 2x + 3 = 11", steps:["Subtract 3 from both sides: 2x = 8","Divide both sides by 2: x = 4","Check: 2(4)+3 = 11 ✓"], result:"x = 4 ✓"},
+      {q:"Find nth term of 3, 7, 11, 15...", steps:["Common difference = 4","Starts at 3 when n=1","nth term = 4n + (3-4) = 4n - 1","Check: n=1: 3 ✓, n=2: 7 ✓"], result:"nth term = 4n - 1 ✓"},
+    ],
+    try_cards: [
+      {q:"Solve: 3x - 5 = 10", a:"x = 5"},
+      {q:"nth term: 5, 9, 13, 17?", a:"4n + 1"},
+      {q:"If n=3, find 2n² + 1", a:"19"},
+    ]
+  },
+
+  "Mean, Median, Mode & Range": {
+    emoji_flow: [
+      {e:"➕", label:"Mean", explain:"Mean = add all values, divide by count"},
+      {e:"🎯", label:"Median", explain:"Median = middle value when in ORDER"},
+      {e:"👑", label:"Mode", explain:"Mode = most COMMON value (can have more than one)"},
+      {e:"📏", label:"Range", explain:"Range = largest - smallest value"},
+    ],
+    golden_rule: "Mean = sum ÷ count. Median = middle (order first!). Mode = most frequent. Range = max - min.",
+    tip: "Remember MMMR: Mean (add&divide), Median (middle), Mode (most), Range (spread).",
+    warn: "Always ORDER the values before finding the median! And there can be NO mode if all values are different.",
+    diagram_title: "Data Explorer — Tap to Calculate",
+    diagram: "averages",
+    worked: [
+      {q:"Find mean of: 3, 7, 5, 9, 6", steps:["Add: 3+7+5+9+6=30","Count: 5 values","Mean = 30÷5"], result:"Mean = 6 ✓"},
+      {q:"Find median of: 2, 5, 3, 8, 4", steps:["Order: 2, 3, 4, 5, 8","Count: 5 values (odd)","Middle = 3rd value"], result:"Median = 4 ✓"},
+    ],
+    try_cards: [
+      {q:"Mean of 4,8,6,10,2?", a:"6"},
+      {q:"Median of 3,7,1,9,5?", a:"5"},
+      {q:"Mode of 4,7,3,7,9,7?", a:"7"},
+    ]
+  },
+
+  "Parts of Speech": {
+    emoji_flow: [
+      {e:"🏷️", label:"Noun", explain:"A PERSON, PLACE or THING: dog, London, happiness"},
+      {e:"⚡", label:"Verb", explain:"An ACTION or STATE: run, think, is, have"},
+      {e:"🎨", label:"Adjective", explain:"DESCRIBES a noun: tall, beautiful, ancient"},
+      {e:"🚀", label:"Adverb", explain:"MODIFIES a verb: quickly, very, always"},
+      {e:"🔗", label:"Conjunction", explain:"JOINS clauses: and, but, because, although"},
+    ],
+    golden_rule: "Nouns = things. Verbs = actions. Adjectives = describe nouns. Adverbs = describe verbs (often end in -ly).",
+    tip: "Test adverbs: does it describe HOW, WHEN or WHERE something happens? It's probably an adverb!",
+    warn: "Not all adjectives come BEFORE the noun. 'The sky is blue' — 'blue' is still an adjective!",
+    diagram_title: "Sentence Spotter — Tap Each Word",
+    diagram: "sentence_parts",
+    worked: [
+      {q:"Identify parts of speech: 'The tiny spider quickly spun a web.'", steps:["The = article","tiny = adjective (describes spider)","spider = noun (the thing)","quickly = adverb (how it spun)","spun = verb (the action)","web = noun"], result:"All identified! ✓"},
+    ],
+    try_cards: [
+      {q:"'She ran quickly.' What is 'quickly'?", a:"Adverb"},
+      {q:"'The beautiful sunset.' What is 'beautiful'?", a:"Adjective"},
+      {q:"'It was raining but we went out.' What is 'but'?", a:"Conjunction"},
+    ]
+  },
+
+  "Synonyms, Antonyms & Word Meanings": {
+    emoji_flow: [
+      {e:"🤝", label:"Synonyms", explain:"Words with SIMILAR meaning: happy = joyful, elated"},
+      {e:"↔️", label:"Antonyms", explain:"Words with OPPOSITE meaning: brave ≠ cowardly"},
+      {e:"🔍", label:"Context", explain:"Use surrounding words to work out meaning"},
+      {e:"💡", label:"Word family", explain:"Recognise root words: terror → terrify, terrible, terrifying"},
+    ],
+    golden_rule: "Synonyms = SAME meaning (roughly). Antonyms = OPPOSITE meaning. Context clues help you work out unfamiliar words!",
+    tip: "Build a word bank! Learn 5 new words each week with their synonyms and antonyms.",
+    warn: "Synonyms are rarely EXACTLY the same. 'Slim' and 'scrawny' both mean thin but have different connotations!",
+    diagram_title: "Word Web — Tap to Explore",
+    diagram: "word_web",
+    worked: [
+      {q:"Find 3 synonyms for 'happy'", steps:["Think of related words...","joyful, elated, content","delighted, gleeful, cheerful"], result:"Many synonyms! ✓"},
+    ],
+    try_cards: [
+      {q:"Synonym for 'enormous'?", a:"gigantic / vast / colossal"},
+      {q:"Antonym of 'generous'?", a:"mean / stingy / miserly"},
+      {q:"'Bewildered' means?", a:"confused / puzzled"},
+    ]
+  },
+
+  "Reading Comprehension & Inference": {
+    emoji_flow: [
+      {e:"👁️", label:"Explicit", explain:"Information DIRECTLY stated in the text"},
+      {e:"🔎", label:"Implicit", explain:"Information you must INFER from clues"},
+      {e:"🎭", label:"Technique", explain:"HOW the author writes: metaphor, personification..."},
+      {e:"💭", label:"Effect", explain:"WHY the author uses it: to create tension, sadness..."},
+    ],
+    golden_rule: "Always use EVIDENCE from the text. Quote or paraphrase, then explain what it shows!",
+    tip: "For inference questions: find the clue words, think about what they suggest, then write your answer.",
+    warn: "Don't just copy out the question! The examiner wants to see YOUR understanding, not the text repeated.",
+    diagram_title: "Reading Techniques — Tap to Learn",
+    diagram: "reading_techniques",
+    worked: [
+      {q:"'He gripped the sides of the boat, knuckles white.' What does this show?", steps:["Gripped = holding tightly (fear)","Knuckles white = very tight grip","This is a physical description of anxiety"], result:"He is very frightened/nervous ✓"},
+    ],
+    try_cards: [
+      {q:"'The sun smiled down.' Technique?", a:"Personification"},
+      {q:"Author uses short sentences. Effect?", a:"Creates pace/tension"},
+      {q:"'Inference' means?", a:"Working out from clues"},
+    ]
+  },
+
+};
+
+// ── DEFAULT DATA (for topics not listed above) ───────────────────────────────
+var defaultData = {
+  emoji_flow: [
+    {e:"📖", label:"Read", explain:"Start by reading the lesson carefully"},
+    {e:"🤔", label:"Think", explain:"Think about how it works"},
+    {e:"✏️", label:"Practice", explain:"Try some examples"},
+    {e:"✅", label:"Ready!", explain:"Now you're ready for the quiz!"},
+  ],
+  golden_rule: "Read the lesson carefully, understand the key rules, then practise!",
+  tip: "Take your time and read each question carefully in the quiz.",
+  warn: "Don't rush! Check your working before moving on.",
+  diagram_title: "Key Concepts",
+  diagram: "generic",
+  worked: [],
+  try_cards: [
+    {q:"Think about the key rule", a:"See the lesson above"},
+  ]
+};
+
+// Get data for this topic
+var data = TOPIC_DATA[topicTitle] || defaultData;
+
+// ── INITIALISE LESSON ──────────────────────────────────────────────────────
+function init() {
+  // Build step dots
+  var dotsEl = document.getElementById('stepDots');
+  for (var i = 1; i <= totalSteps; i++) {
+    var d = document.createElement('div');
+    d.className = 'step-dot' + (i === 1 ? ' active' : '');
+    d.onclick = (function(step){ return function(){ goToStep(step); }; })(i);
+    dotsEl.appendChild(d);
+  }
+
+  // Build emoji flow
+  buildEmojiFlow();
+
+  // Build rules
+  document.getElementById('goldenRule').textContent = data.golden_rule || defaultData.golden_rule;
+  document.getElementById('tipText').textContent = data.tip || defaultData.tip;
+  document.getElementById('warnText').textContent = data.warn || defaultData.warn;
+
+  // Build diagram
+  document.getElementById('diagramTitle').textContent = data.diagram_title || 'Interactive Diagram';
+  buildDiagram();
+
+  // Build worked examples
+  buildWorkedExamples();
+
+  // Build try cards
+  buildTryCards();
+
+  // Hide lesson HTML from step 1 after — keep only first block
+  trimIntroContent();
+}
+
+function trimIntroContent() {
+  var intro = document.getElementById('intro-content');
+  if (!intro) return;
+  // Keep content as is — it's the full lesson from DB
+}
+
+function buildEmojiFlow() {
+  var flow = document.getElementById('emojiFlow');
+  if (!flow) return;
+  var items = data.emoji_flow || defaultData.emoji_flow;
+  items.forEach(function(item, i) {
+    var div = document.createElement('div');
+    div.className = 'step-emoji';
+    div.innerHTML = '<div style="font-size:28px">' + item.e + '</div><div class="label">' + item.label + '</div>';
+    div.onclick = (function(explain){ return function() {
+      document.querySelectorAll('.step-emoji').forEach(function(el){ el.classList.remove('active'); });
+      div.classList.add('active');
+      document.getElementById('emojiExplain').textContent = explain;
+    }; })(item.explain);
+    flow.appendChild(div);
+    if (i < items.length - 1) {
+      var arrow = document.createElement('div');
+      arrow.className = 'arrow';
+      arrow.textContent = '→';
+      flow.appendChild(arrow);
+    }
+  });
+}
+
+function buildDiagram() {
+  var zone = document.getElementById('diagramContent');
+  var explain = document.getElementById('diagramExplain');
+  var type = data.diagram || 'generic';
+
+  if (type === 'place_value' && data.number) {
+    var cols = data.columns;
+    var vals = data.number;
+    var worths = data.worths;
+    var html = '<div class="pv-chart">';
+    for (var i = 0; i < cols.length; i++) {
+      html += '<div class="pv-col" data-worth="' + worths[i] + '" onclick="pvClick(this)">';
+      html += '<div class="col-name">' + cols[i] + '</div>';
+      html += '<div class="col-val">' + vals[i] + '</div>';
+      html += '<div class="col-worth" style="display:none">' + worths[i] + '</div>';
+      html += '</div>';
+    }
+    html += '</div>';
+    html += '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:8px;">Number: <strong style="color:white;font-size:18px;">3,847,265</strong></div>';
+    zone.innerHTML = html;
+
+  } else if (type === 'number_line') {
+    var nums = [-5,-4,-3,-2,-1,0,1,2,3,4,5];
+    var html = '<div class="num-line"><div class="num-line-bar"></div>';
+    nums.forEach(function(n, i) {
+      var pct = (i / (nums.length-1)) * 100;
+      var isZero = n === 0;
+      html += '<div class="num-line-marker' + (isZero ? ' highlight' : '') + '" style="left:' + pct + '%" onclick="nlClick(this,' + n + ')">';
+      html += '<div class="tick"></div>';
+      html += '<div class="label">' + n + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    zone.innerHTML = html;
+
+  } else if (type === 'fraction_bar') {
+    var html = '<div style="margin-bottom:12px"><strong style="color:white">Tap pieces to fill — make 3/4</strong></div>';
+    html += '<div class="frac-bar" id="fracBar">';
+    for (var i = 0; i < 4; i++) {
+      html += '<div class="frac-piece" onclick="fracClick(this)">' + (i+1) + '/4</div>';
+    }
+    html += '</div>';
+    html += '<div id="fracResult" style="font-size:16px;color:rgba(255,255,255,0.5);margin-top:8px;">Tap the pieces above!</div>';
+    zone.innerHTML = html;
+
+  } else if (type === 'rounding') {
+    zone.innerHTML = `
+      <div style="font-size:15px;color:rgba(255,255,255,0.7);margin-bottom:16px">Round <strong style="color:white;font-size:20px">47,382</strong> to the nearest 1,000</div>
+      <div style="display:flex;gap:6px;justify-content:center;margin-bottom:16px">
+        ${[4,7,',',3,8,2].map((d,i)=>d===','?'<span style="color:white;font-size:24px;font-weight:900">,</span>':'<div onclick="roundClick('+i+')" style="background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 14px;font-size:24px;font-weight:900;cursor:pointer;color:white;transition:all 0.2s" id="rd'+i+'">'+d+'</div>').join('')}
+      </div>
+      <div id="roundExplain" style="font-size:14px;color:rgba(255,255,255,0.5)">Tap the THOUSANDS digit first!</div>`;
+
+  } else if (type === 'bodmas') {
+    var steps = ['Brackets first', 'Then Orders (powers)', 'Then × and ÷', 'Finally + and −'];
+    var html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+    steps.forEach(function(s, i) {
+      html += '<div onclick="bodmasClick(this,'+i+')" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 16px;cursor:pointer;transition:all 0.2s;font-weight:700;color:rgba(255,255,255,0.7)">' + (i+1) + '. ' + s + '</div>';
+    });
+    html += '</div>';
+    zone.innerHTML = html;
+
+  } else if (type === 'averages') {
+    zone.innerHTML = `
+      <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:12px">Dataset: <strong style="color:white">3, 7, 5, 9, 6</strong></div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <div onclick="avgClick('mean')" style="background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3);border-radius:12px;padding:14px 20px;cursor:pointer;font-weight:800;color:white">📊 Mean</div>
+        <div onclick="avgClick('median')" style="background:rgba(0,200,150,0.15);border:1px solid rgba(0,200,150,0.3);border-radius:12px;padding:14px 20px;cursor:pointer;font-weight:800;color:white">🎯 Median</div>
+        <div onclick="avgClick('mode')" style="background:rgba(251,183,36,0.15);border:1px solid rgba(251,183,36,0.3);border-radius:12px;padding:14px 20px;cursor:pointer;font-weight:800;color:white">👑 Mode</div>
+        <div onclick="avgClick('range')" style="background:rgba(255,107,107,0.15);border:1px solid rgba(255,107,107,0.3);border-radius:12px;padding:14px 20px;cursor:pointer;font-weight:800;color:white">📏 Range</div>
+      </div>
+      <div id="avgResult" style="margin-top:16px;font-size:15px;color:rgba(255,255,255,0.5)">Tap a button to calculate!</div>`;
+
+  } else {
+    // Generic: show emoji flow as diagram
+    zone.innerHTML = '<div style="font-size:40px;margin-bottom:8px">🎓</div><div style="color:rgba(255,255,255,0.6);font-size:14px">Tap the emoji steps above to explore this topic!</div>';
+  }
+}
+
+// Diagram interaction functions
+window.pvClick = function(el) {
+  document.querySelectorAll('.pv-col').forEach(function(c){ c.classList.remove('lit'); });
+  el.classList.add('lit');
+  var worth = el.getAttribute('data-worth');
+  var name = el.querySelector('.col-name').textContent;
+  document.getElementById('diagramExplain').textContent = 'The ' + name + ' column is worth ' + worth + '!';
+};
+
+window.nlClick = function(el, n) {
+  document.querySelectorAll('.num-line-marker').forEach(function(m){ m.classList.remove('highlight'); });
+  el.classList.add('highlight');
+  var msg = n === 0 ? 'Zero — the dividing point between positive and negative numbers!' :
+            n < 0 ? n + ' is a NEGATIVE number — ' + Math.abs(n) + ' below zero' :
+            n + ' is a POSITIVE number — ' + n + ' above zero';
+  document.getElementById('diagramExplain').textContent = msg;
+};
+
+window.fracClick = function(el) {
+  el.classList.toggle('filled');
+  var filled = document.querySelectorAll('.frac-piece.filled').length;
+  var result = document.getElementById('fracResult');
+  if (filled === 0) result.textContent = 'Nothing filled yet!';
+  else if (filled === 4) result.innerHTML = '<span style="color:#FF6B6B">4/4 = 1 whole!</span>';
+  else if (filled === 3) result.innerHTML = '<span style="color:#00C896">3/4 — you got it! Three quarters ✓</span>';
+  else result.textContent = filled + '/4 filled';
+};
+
+window.roundClick = function(i) {
+  var msgs = ['That\'s the ten-thousands digit (4). Not what we need.','That\'s the thousands digit (7)! Round based on next digit (3). 3<5, so round DOWN → 47,000','This comma separates thousands from hundreds','That\'s the hundreds digit (3). 3<5 so the thousands digit STAYS the same!','That\'s the tens digit (8).','That\'s the ones digit (2).'];
+  document.getElementById('roundExplain').textContent = msgs[i] || 'Tap the digits!';
+  document.querySelectorAll('[id^="rd"]').forEach(function(el){el.style.borderColor='rgba(255,255,255,0.1)'; el.style.background='rgba(255,255,255,0.06)';});
+  var el = document.getElementById('rd'+i);
+  if (el) { el.style.borderColor=color; el.style.background=color+'33'; }
+};
+
+window.bodmasClick = function(el, i) {
+  document.querySelectorAll('#diagramContent > div > div').forEach(function(d){ d.style.borderColor='rgba(255,255,255,0.1)'; d.style.color='rgba(255,255,255,0.7)'; });
+  el.style.borderColor = color;
+  el.style.color = 'white';
+  var explains = ['Brackets: always calculate what\'s inside () or [] first!','Orders: powers like 3² = 9 and square roots come next','Divide and Multiply: work from LEFT to RIGHT','Add and Subtract: work from LEFT to RIGHT'];
+  document.getElementById('diagramExplain').textContent = explains[i];
+};
+
+window.avgClick = function(type) {
+  var results = {
+    mean: 'Mean: (3+7+5+9+6) ÷ 5 = 30 ÷ 5 = 6 📊',
+    median: 'Median: order → 3,5,6,7,9. Middle value = 6 🎯',
+    mode: 'Mode: each appears once — NO mode! 👑',
+    range: 'Range: 9 - 3 = 6 📏'
+  };
+  document.getElementById('avgResult').innerHTML = '<strong style="color:white">' + results[type] + '</strong>';
+};
+
+function buildWorkedExamples() {
+  var container = document.getElementById('workedExamples');
+  if (!container) return;
+  var examples = data.worked || [];
+  if (examples.length === 0) {
+    container.innerHTML = '<p style="color:rgba(255,255,255,0.5);font-size:14px">Read through the lesson steps carefully!</p>';
+    return;
+  }
+  var html = '';
+  examples.forEach(function(ex) {
+    html += '<div class="worked"><div class="worked-title">📝 ' + ex.q + '</div>';
+    (ex.steps || []).forEach(function(s, i) {
+      html += '<div class="worked-line"><span class="step-label">Step '+(i+1)+':</span>' + s + '</div>';
+    });
+    html += '<div class="worked-line result">✅ ' + ex.result + '</div></div>';
+  });
+  container.innerHTML = html;
+}
+
+function buildTryCards() {
+  var container = document.getElementById('tryCards');
+  if (!container) return;
+  var cards = data.try_cards || defaultData.try_cards;
+  var html = '';
+  cards.forEach(function(card) {
+    html += '<div class="ex-card" onclick="this.classList.add(\'revealed\')">';
+    html += '<div class="question">' + card.q + '</div>';
+    html += '<div class="answer">✅ ' + card.a + '</div>';
+    html += '<div class="tap-hint">👆 Tap to reveal</div>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+// ── STEP NAVIGATION ────────────────────────────────────────────────────────
+function goToStep(n) {
+  if (n < 1 || n > totalSteps) return;
+
+  // Hide current, show new
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  currentStep = n;
+  document.getElementById('step-' + currentStep).classList.add('active');
+
+  // Update dots
+  document.querySelectorAll('.step-dot').forEach(function(d, i) {
+    d.classList.remove('active', 'done');
+    if (i + 1 < currentStep) d.classList.add('done');
+    if (i + 1 === currentStep) d.classList.add('active');
+  });
+
+  // Update progress bar
+  var pct = ((currentStep - 1) / (totalSteps - 1)) * 100;
+  document.getElementById('lessonProgress').style.width = pct + '%';
+
+  // Update nav buttons
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  prevBtn.style.display = currentStep > 1 ? 'block' : 'none';
+
+  if (currentStep === totalSteps) {
+    nextBtn.style.display = 'none';
+  } else {
+    nextBtn.style.display = 'block';
+    nextBtn.textContent = currentStep === totalSteps - 1 ? "I'm Ready! 🎯" : 'Next →';
+  }
+
+  // Scroll to top
+  document.getElementById('lessonProgress').scrollIntoView({behavior:'smooth'});
+}
+
+function changeStep(dir) {
+  goToStep(currentStep + dir);
+}
+
+// ── START ──────────────────────────────────────────────────────────────────
+window.addEventListener('load', function() {
+  init();
+  goToStep(1);
+});
+</script>
+
 {% endblock %}
