@@ -95,7 +95,7 @@ def make_q_page(topic, q, qnum, total, color, next_stage, prev_data):
         for val, ltr in [(q['option_a'],'A'),(q['option_b'],'B'),(q['option_c'],'C'),(q['option_d'],'D')]:
             if val:
                 sv = str(val).replace('&','&amp;').replace('<','&lt;').replace('>','&gt;').replace('"','&quot;')
-                opts += '<button type="submit" name="ans" value="{v}" style="width:100%;padding:16px 18px;margin:8px 0;border-radius:14px;border:2px solid #2A2A4A;background:rgba(255,255,255,0.03);font-size:16px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit;color:white;display:flex;align-items:center;gap:12px;touch-action:manipulation;-webkit-appearance:none;"><span style="width:34px;height:34px;border-radius:50%;background:#2A2A4A;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;">{l}</span><span>{v}</span></button>'.format(v=sv,l=ltr)
+                opts += '<button type="submit" name="ans" value="{v}" style="width:100%;padding:16px 18px;margin:8px 0;border-radius:14px;border:2px solid #2A2A4A;background:rgba(255,255,255,0.03);font-size:16px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit;color:white;display:flex;align-items:center;gap:12px;touch-action:manipulation;-webkit-appearance:none;transition:background 0.1s,border-color 0.1s;"><span style="width:34px;height:34px;border-radius:50%;background:#2A2A4A;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;">{l}</span><span>{v}</span></button>'.format(v=sv,l=ltr)
     else:
         opts = '<input type="text" name="ans" placeholder="Type your answer..." autocomplete="off" style="width:100%;padding:14px;border-radius:14px;border:2px solid #2A2A4A;font-size:16px;font-weight:700;font-family:inherit;background:rgba(255,255,255,0.05);color:white;margin-bottom:12px;display:block;"><button type="submit" style="width:100%;padding:16px;border-radius:50px;background:{c};color:white;border:none;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;touch-action:manipulation;">Next</button>'.format(c=color)
 
@@ -104,7 +104,7 @@ def make_q_page(topic, q, qnum, total, color, next_stage, prev_data):
         sv = str(v).replace('&','&amp;').replace('"','&quot;')
         hidden += '<input type="hidden" name="prev_{0}" value="{1}">'.format(k, sv)
 
-    return Response('''<!DOCTYPE html><html><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Quiz</title><style>*{{box-sizing:border-box;margin:0;padding:0}}body{{font-family:-apple-system,sans-serif;background:#0A0A1A;color:white}}</style></head><body>
+    return Response('''<!DOCTYPE html><html><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Quiz</title><style>*{{box-sizing:border-box;margin:0;padding:0}}body{{font-family:-apple-system,sans-serif;background:#0A0A1A;color:white}}</style><script>document.addEventListener("submit",function(e){var btn=e.submitter;if(btn&&btn.name==="ans"){btn.style.background="rgba(108,99,255,0.4)";btn.style.borderColor="#6C63FF";btn.querySelector("span").style.background="#6C63FF";}})</script></head><body>
 <div style="background:#1A1A35;border-bottom:1px solid #2A2A4A;padding:14px 16px;position:sticky;top:0;">
   <div style="font-size:13px;font-weight:900;margin-bottom:4px;">{title}</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:6px;">Question {qnum} of {total}</div>
