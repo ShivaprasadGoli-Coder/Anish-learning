@@ -3,11 +3,9 @@
 {% block content %}
 {% set color = COLORS.get(topic["subject"],"#6C63FF") %}
 <style>
-.qwrap{position:relative;min-height:300px;}
 .qcard{display:none;background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:24px;margin-bottom:16px;}
 .opt{width:100%;padding:14px 18px;margin:8px 0;border-radius:14px;border:2px solid #2A2A4A;background:rgba(255,255,255,0.03);font-size:16px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit;color:white;display:flex;align-items:center;gap:12px;}
 .opt.sel{border-color:#6C63FF;background:rgba(108,99,255,0.2);}
-.opt:disabled{opacity:0.6;cursor:not-allowed;}
 .ltr{width:36px;height:36px;border-radius:50%;background:#2A2A4A;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;flex-shrink:0;color:white;}
 .opt.sel .ltr{background:#6C63FF;}
 .type-in{width:100%;padding:14px 18px;border-radius:14px;border:2px solid #2A2A4A;font-size:16px;font-weight:700;font-family:inherit;background:rgba(255,255,255,0.05);color:white;margin-bottom:10px;}
@@ -16,7 +14,7 @@
 .prog-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,#6C63FF,#A78BFA);transition:width 0.4s;}
 </style>
 
-<div id="topbar" style="background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:20px;margin-bottom:16px;">
+<div style="background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:20px;margin-bottom:16px;">
   <div style="font-size:15px;font-weight:900;margin-bottom:8px;">{{ topic["title"] }}</div>
   <div style="color:rgba(255,255,255,0.5);font-size:13px;font-weight:700;margin-bottom:6px;">
     Question <span id="qnum">1</span> of {{ questions|length }}
@@ -26,7 +24,6 @@
 
 <form method="post" action="/quiz/{{ topic["id"] }}/submit" id="qform">
   <input type="hidden" name="next_stage" value="{{ next_stage }}">
-  <div class="qwrap" id="qwrap">
   {% for q in questions %}
   <div class="qcard" id="qc{{ loop.index }}">
     <input type="hidden" name="question_ids" value="{{ q["id"] }}">
@@ -47,7 +44,6 @@
     {% endif %}
   </div>
   {% endfor %}
-  </div>
 
   <div id="done" style="display:none;background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:48px;text-align:center;">
     <div style="font-size:72px;margin-bottom:16px;">🎉</div>
@@ -64,10 +60,11 @@
 <script>
 var total = {{ questions|length }};
 var busy = false;
-
-// Show only first question
-document.getElementById("qc1").style.display = "block";
-
+window.onload = function() {
+  document.getElementById("qc1").style.display = "block";
+  document.getElementById("prog").style.width = "0%";
+  document.getElementById("qnum").textContent = "1";
+};
 function pick(btn) {
   if (busy) return;
   busy = true;
@@ -75,27 +72,20 @@ function pick(btn) {
   var n = parseInt(btn.getAttribute("data-n"));
   var val = btn.getAttribute("data-val");
   document.getElementById("ans" + qid).value = val;
-  // Highlight selected, disable all buttons in this card
-  var card = btn.closest(".qcard");
-  card.querySelectorAll(".opt").forEach(function(b) {
-    b.setAttribute("disabled", "true");
+  btn.closest(".qcard").querySelectorAll(".opt").forEach(function(b) {
+    b.setAttribute("disabled","true");
     b.onclick = null;
   });
   btn.classList.add("sel");
   btn.querySelector(".ltr").style.background = "#6C63FF";
-  setTimeout(function() { advance(n); }, 600);
+  setTimeout(function() { advance(n); }, 500);
 }
-
 function advance(n) {
-  // Hide current
   var cur = document.getElementById("qc" + n);
   if (cur) cur.style.display = "none";
-  // Update progress
   var pct = Math.round((n / total) * 100);
   document.getElementById("prog").style.width = pct + "%";
   document.getElementById("qnum").textContent = Math.min(n + 1, total);
-  // Scroll to top of page
-  document.getElementById("topbar").scrollIntoView({behavior: "smooth"});
   if (n < total) {
     var next = document.getElementById("qc" + (n + 1));
     if (next) next.style.display = "block";
@@ -105,11 +95,7 @@ function advance(n) {
   }
   busy = false;
 }
-
-// Prevent accidental back navigation
 history.pushState(null, null, location.href);
-window.onpopstate = function() {
-  history.pushState(null, null, location.href);
-};
+window.onpopstate = function() { history.pushState(null, null, location.href); };
 </script>
 {% endblock %}
