@@ -3,14 +3,16 @@
 {% block content %}
 {% set color = COLORS.get(topic["subject"],"#6C63FF") %}
 <style>
-.qcard{background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:24px;margin-bottom:16px;}
-.opt{width:100%;padding:16px 18px;margin:8px 0;border-radius:14px;border:2px solid #2A2A4A;background:rgba(255,255,255,0.03);font-size:16px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit;color:white;display:flex;align-items:center;gap:12px;transition:border-color 0.2s;}
-.opt:active{background:rgba(108,99,255,0.2);}
-.ltr{width:36px;height:36px;border-radius:50%;background:#2A2A4A;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;flex-shrink:0;color:white;}
-.type-in{width:100%;padding:14px;border-radius:14px;border:2px solid #2A2A4A;font-size:16px;font-weight:700;font-family:inherit;background:rgba(255,255,255,0.05);color:white;margin-bottom:10px;}
-.type-in:focus{outline:none;border-color:#6C63FF;}
-.prog-wrap{background:rgba(255,255,255,0.1);border-radius:50px;height:10px;overflow:hidden;margin-top:8px;}
-.prog-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,#6C63FF,#A78BFA);transition:width 0.4s;}
+#quiz-wrap .qcard { display: none !important; }
+#quiz-wrap .qcard.visible { display: block !important; }
+.opt { width:100%; padding:16px 18px; margin:8px 0; border-radius:14px; border:2px solid #2A2A4A; background:rgba(255,255,255,0.03); font-size:16px; font-weight:700; cursor:pointer; text-align:left; font-family:inherit; color:white; display:flex; align-items:center; gap:12px; }
+.opt.chosen { border-color: {{ color }}; background: rgba(108,99,255,0.2); }
+.ltr { width:36px; height:36px; border-radius:50%; background:#2A2A4A; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:14px; flex-shrink:0; color:white; }
+.opt.chosen .ltr { background: {{ color }}; color: white; }
+.type-in { width:100%; padding:14px; border-radius:14px; border:2px solid #2A2A4A; font-size:16px; font-weight:700; font-family:inherit; background:rgba(255,255,255,0.05); color:white; margin-bottom:10px; display:block; }
+.type-in:focus { outline:none; border-color: {{ color }}; }
+.prog-wrap { background:rgba(255,255,255,0.1); border-radius:50px; height:10px; overflow:hidden; margin-top:8px; }
+.prog-fill { height:100%; border-radius:50px; background:linear-gradient(90deg,{{ color }},{{ color }}88); transition:width 0.4s; }
 </style>
 
 <div id="topbar" style="background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:20px;margin-bottom:16px;">
@@ -21,125 +23,127 @@
   <div class="prog-wrap"><div class="prog-fill" id="prog" style="width:0%"></div></div>
 </div>
 
-<div id="question-area">
-<form method="post" action="/quiz/{{ topic["id"] }}/submit" id="qform">
+<form method="post" action="/quiz/{{ topic['id'] }}/submit" id="qform">
   <input type="hidden" name="next_stage" value="{{ next_stage }}">
-
+  <div id="quiz-wrap">
   {% for q in questions %}
-  <div id="qc{{ loop.index }}" style="display:none;">
-    <div class="qcard">
-      <input type="hidden" name="question_ids" value="{{ q["id"] }}">
-      <div style="margin-bottom:14px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);">
-        {% if q["difficulty"]==1 %}⚡ Easy{% elif q["difficulty"]==2 %}🔥 Medium{% else %}💎 Hard{% endif %}
+  <div class="qcard" id="qc{{ loop.index }}">
+    <div style="background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:24px;margin-bottom:16px;">
+      <input type="hidden" name="question_ids" value="{{ q['id'] }}">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:14px;">
+        {% if q['difficulty']==1 %}Easy{% elif q['difficulty']==2 %}Medium{% else %}Hard{% endif %}
       </div>
-      <div style="font-size:18px;font-weight:800;line-height:1.6;margin-bottom:20px;color:white;">{{ q["question_text"] }}</div>
-      {% if q["question_type"] == "mc" %}
-        <input type="hidden" name="answer_{{ q["id"] }}" id="ans{{ q["id"] }}" value="">
-        {% for opt, ltr in [(q["option_a"],"A"),(q["option_b"],"B"),(q["option_c"],"C"),(q["option_d"],"D")] if opt %}
-        <button type="button" class="opt" data-qid="{{ q["id"] }}" data-n="{{ loop.index }}" data-val="{{ opt }}" onclick="pick(this)">
-          <div class="ltr">{{ ltr }}</div><span>{{ opt }}</span>
+      <div style="font-size:18px;font-weight:800;line-height:1.6;margin-bottom:20px;color:white;">
+        {{ q['question_text'] }}
+      </div>
+      {% if q['question_type'] == 'mc' %}
+        <input type="hidden" name="answer_{{ q['id'] }}" id="ans{{ q['id'] }}" value="">
+        {% for opt, ltr in [(q['option_a'],'A'),(q['option_b'],'B'),(q['option_c'],'C'),(q['option_d'],'D')] if opt %}
+        <button type="button" class="opt"
+          onclick="pickAnswer(this, '{{ q['id'] }}', {{ loop.index }}, '{{ opt | replace("'", "\\'") }}')"
+          >
+          <div class="ltr">{{ ltr }}</div>
+          <span>{{ opt }}</span>
         </button>
         {% endfor %}
       {% else %}
-        <input type="text" class="type-in" name="answer_{{ q["id"] }}" placeholder="Type your answer here..." autocomplete="off">
-        <button type="button" onclick="advance({{ loop.index }})" style="background:#6C63FF;color:white;border:none;padding:16px;border-radius:50px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;width:100%;margin-top:8px;">Next →</button>
+        <input type="text" class="type-in" name="answer_{{ q['id'] }}" placeholder="Type your answer...">
+        <button type="button"
+          style="background:#6C63FF;color:white;border:none;padding:16px;border-radius:50px;font-size:16px;font-weight:800;cursor:pointer;width:100%;margin-top:8px;font-family:inherit;"
+          onclick="nextQuestion({{ loop.index }})">Next →</button>
       {% endif %}
     </div>
   </div>
   {% endfor %}
+  </div>
 
-  <div id="done" style="display:none;">
-    <div class="qcard" style="text-align:center;padding:48px;">
-      <div style="font-size:72px;margin-bottom:16px;">🎉</div>
-      <h2 style="font-size:26px;font-weight:900;color:white;margin-bottom:8px;">All done, Anish!</h2>
-      <p style="color:rgba(255,255,255,0.5);margin-bottom:28px;">You answered all {{ questions|length }} questions!</p>
-      <button type="submit" style="background:linear-gradient(135deg,#00C896,#00E5AB);color:#0A2E24;border:none;padding:18px 40px;border-radius:50px;font-size:20px;font-weight:900;cursor:pointer;font-family:inherit;width:100%;">🏆 See My Results!</button>
-    </div>
+  <div id="finish-screen" style="display:none;background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:48px;text-align:center;">
+    <div style="font-size:72px;margin-bottom:16px;">🎉</div>
+    <h2 style="font-size:24px;font-weight:900;margin-bottom:8px;color:white;">All done, Anish!</h2>
+    <p style="color:rgba(255,255,255,0.5);margin-bottom:24px;">You answered all {{ questions|length }} questions!</p>
+    <button type="submit" style="background:linear-gradient(135deg,#00C896,#00E5AB);color:#0A2E24;border:none;padding:18px 40px;border-radius:50px;font-size:20px;font-weight:900;cursor:pointer;font-family:inherit;width:100%;">🏆 See My Results!</button>
   </div>
 </form>
-</div>
 
 <div style="margin-top:16px;">
-  <a href="/learn/{{ topic["id"] }}" style="background:rgba(255,255,255,0.1);color:white;border:1px solid #2A2A4A;padding:10px 20px;border-radius:50px;font-weight:800;font-size:13px;display:inline-block;">← Back to Lesson</a>
+  <a href="/learn/{{ topic['id'] }}" style="background:rgba(255,255,255,0.1);color:white;border:1px solid #2A2A4A;padding:10px 20px;border-radius:50px;font-weight:800;font-size:13px;display:inline-block;">← Back to Lesson</a>
 </div>
 
 <script>
 var TOTAL = {{ questions|length }};
-var current = 1;
-var locked = false;
+var busy = false;
 
-function showQuestion(n) {
-  // Hide ALL questions first
-  for (var i = 1; i <= TOTAL; i++) {
-    var el = document.getElementById('qc' + i);
-    if (el) el.style.display = 'none';
-  }
-  document.getElementById('done').style.display = 'none';
-  
-  if (n > TOTAL) {
-    // Show finish screen
-    document.getElementById('done').style.display = 'block';
-    document.getElementById('prog').style.width = '100%';
-    document.getElementById('qnum').textContent = TOTAL;
-  } else {
-    // Show just this one question
-    var el = document.getElementById('qc' + n);
-    if (el) el.style.display = 'block';
-    document.getElementById('qnum').textContent = n;
-    var pct = Math.round(((n-1) / TOTAL) * 100);
-    document.getElementById('prog').style.width = pct + '%';
-  }
-  document.getElementById('topbar').scrollIntoView({behavior:'smooth', block:'start'});
+function goToQuestion(n) {
+    // Hide all
+    for (var i = 1; i <= TOTAL; i++) {
+        var el = document.getElementById('qc' + i);
+        if (el) {
+            el.classList.remove('visible');
+        }
+    }
+    document.getElementById('finish-screen').style.display = 'none';
+
+    if (n > TOTAL) {
+        // Show finish
+        document.getElementById('finish-screen').style.display = 'block';
+        document.getElementById('prog').style.width = '100%';
+        document.getElementById('qnum').textContent = TOTAL;
+    } else {
+        // Show question n
+        var el = document.getElementById('qc' + n);
+        if (el) el.classList.add('visible');
+        document.getElementById('qnum').textContent = n;
+        document.getElementById('prog').style.width = (Math.round(((n-1)/TOTAL)*100)) + '%';
+    }
+    document.getElementById('topbar').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 
-function pick(btn) {
-  if (locked) return;
-  locked = true;
-  
-  var qid = btn.getAttribute('data-qid');
-  var n = parseInt(btn.getAttribute('data-n'));
-  var val = btn.getAttribute('data-val');
-  
-  // Save answer
-  document.getElementById('ans' + qid).value = val;
-  
-  // Highlight chosen button
-  var card = btn.closest('.qcard');
-  var allBtns = card.querySelectorAll('.opt');
-  allBtns.forEach(function(b) {
-    b.onclick = null;
-    b.style.pointerEvents = 'none';
-  });
-  btn.style.borderColor = '#6C63FF';
-  btn.style.background = 'rgba(108,99,255,0.25)';
-  btn.querySelector('.ltr').style.background = '#6C63FF';
-  btn.querySelector('.ltr').style.color = 'white';
-  
-  // Move to next after delay
-  setTimeout(function() {
-    current = n + 1;
-    locked = false;
-    showQuestion(current);
-  }, 500);
+function pickAnswer(btn, qid, questionNumber, val) {
+    if (busy) return;
+    busy = true;
+
+    // Save the answer
+    var hiddenInput = document.getElementById('ans' + qid);
+    if (hiddenInput) hiddenInput.value = val;
+
+    // Disable all options in this question
+    var card = document.getElementById('qc' + questionNumber);
+    if (card) {
+        var allOpts = card.querySelectorAll('.opt');
+        allOpts.forEach(function(opt) {
+            opt.onclick = null;
+            opt.style.pointerEvents = 'none';
+            opt.style.opacity = '0.5';
+        });
+    }
+
+    // Highlight chosen
+    btn.classList.add('chosen');
+    btn.style.opacity = '1';
+
+    // Move to next after short delay
+    setTimeout(function() {
+        busy = false;
+        goToQuestion(questionNumber + 1);
+    }, 450);
 }
 
-function advance(n) {
-  if (locked) return;
-  locked = true;
-  setTimeout(function() {
-    current = n + 1;
-    locked = false;
-    showQuestion(current);
-  }, 100);
+function nextQuestion(n) {
+    if (busy) return;
+    busy = true;
+    setTimeout(function() {
+        busy = false;
+        goToQuestion(n + 1);
+    }, 100);
 }
 
-// Prevent back swipe during quiz
+// Prevent back swipe
 history.pushState(null, null, location.href);
 window.addEventListener('popstate', function() {
-  history.pushState(null, null, location.href);
+    history.pushState(null, null, location.href);
 });
 
-// START: show question 1
-showQuestion(1);
+// Start at question 1
+goToQuestion(1);
 </script>
 {% endblock %}
