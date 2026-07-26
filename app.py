@@ -104,7 +104,7 @@ def make_q_page(topic, q, qnum, total, color, next_stage, prev_data):
         sv = str(v).replace('&','&amp;').replace('"','&quot;')
         hidden += '<input type="hidden" name="prev_{0}" value="{1}">'.format(k, sv)
 
-    return Response('''<!DOCTYPE html><html><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Quiz</title><style>*{{box-sizing:border-box;margin:0;padding:0}}body{{font-family:-apple-system,sans-serif;background:#0A0A1A;color:white}}</style><script>document.addEventListener("submit",function(e){var btn=e.submitter;if(btn&&btn.name==="ans"){btn.style.background="rgba(108,99,255,0.4)";btn.style.borderColor="#6C63FF";btn.querySelector("span").style.background="#6C63FF";}})</script></head><body>
+    return Response('''<!DOCTYPE html><html><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Quiz</title><style>*{{box-sizing:border-box;margin:0;padding:0}}body{{font-family:-apple-system,sans-serif;background:#0A0A1A;color:white}}</style></head><body>
 <div style="background:#1A1A35;border-bottom:1px solid #2A2A4A;padding:14px 16px;position:sticky;top:0;">
   <div style="font-size:13px;font-weight:900;margin-bottom:4px;">{title}</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:6px;">Question {qnum} of {total}</div>
