@@ -3,12 +3,12 @@
 {% block content %}
 {% set color = COLORS.get(topic["subject"],"#6C63FF") %}
 <style>
+.qwrap{position:relative;min-height:300px;}
 .qcard{display:none;background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:24px;margin-bottom:16px;}
-.qcard.show{display:block;}
-.opt{width:100%;padding:14px 18px;margin:8px 0;border-radius:14px;border:2px solid #2A2A4A;background:rgba(255,255,255,0.03);font-size:15px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit;color:white;display:flex;align-items:center;gap:12px;transition:all 0.2s;}
-.opt:hover{border-color:#6C63FF;background:rgba(108,99,255,0.1);}
+.opt{width:100%;padding:14px 18px;margin:8px 0;border-radius:14px;border:2px solid #2A2A4A;background:rgba(255,255,255,0.03);font-size:16px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit;color:white;display:flex;align-items:center;gap:12px;}
 .opt.sel{border-color:#6C63FF;background:rgba(108,99,255,0.2);}
-.ltr{width:32px;height:32px;border-radius:50%;background:#2A2A4A;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;}
+.opt:disabled{opacity:0.6;cursor:not-allowed;}
+.ltr{width:36px;height:36px;border-radius:50%;background:#2A2A4A;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;flex-shrink:0;color:white;}
 .opt.sel .ltr{background:#6C63FF;}
 .type-in{width:100%;padding:14px 18px;border-radius:14px;border:2px solid #2A2A4A;font-size:16px;font-weight:700;font-family:inherit;background:rgba(255,255,255,0.05);color:white;margin-bottom:10px;}
 .type-in:focus{outline:none;border-color:#6C63FF;}
@@ -16,21 +16,22 @@
 .prog-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,#6C63FF,#A78BFA);transition:width 0.4s;}
 </style>
 
-<div style="background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:20px;margin-bottom:16px;">
+<div id="topbar" style="background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:20px;margin-bottom:16px;">
   <div style="font-size:15px;font-weight:900;margin-bottom:8px;">{{ topic["title"] }}</div>
-  <div style="display:flex;justify-content:space-between;color:rgba(255,255,255,0.5);font-size:13px;font-weight:700;margin-bottom:6px;">
-    <span>Question <span id="qnum">1</span> of {{ questions|length }}</span>
+  <div style="color:rgba(255,255,255,0.5);font-size:13px;font-weight:700;margin-bottom:6px;">
+    Question <span id="qnum">1</span> of {{ questions|length }}
   </div>
   <div class="prog-wrap"><div class="prog-fill" id="prog" style="width:0%"></div></div>
 </div>
 
 <form method="post" action="/quiz/{{ topic["id"] }}/submit" id="qform">
   <input type="hidden" name="next_stage" value="{{ next_stage }}">
+  <div class="qwrap" id="qwrap">
   {% for q in questions %}
-  <div class="qcard {% if loop.first %}show{% endif %}" id="qc{{ loop.index }}">
+  <div class="qcard" id="qc{{ loop.index }}">
     <input type="hidden" name="question_ids" value="{{ q["id"] }}">
-    <div style="margin-bottom:16px;">
-      <span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);">{% if q["difficulty"]==1 %}⚡ Easy{% elif q["difficulty"]==2 %}🔥 Medium{% else %}💎 Hard{% endif %}</span>
+    <div style="margin-bottom:16px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);">
+      {% if q["difficulty"]==1 %}⚡ Easy{% elif q["difficulty"]==2 %}🔥 Medium{% else %}💎 Hard{% endif %}
     </div>
     <div style="font-size:18px;font-weight:800;line-height:1.6;margin-bottom:20px;color:white;">{{ q["question_text"] }}</div>
     {% if q["question_type"] == "mc" %}
@@ -42,10 +43,11 @@
       {% endfor %}
     {% else %}
       <input type="text" class="type-in" name="answer_{{ q["id"] }}" placeholder="Type your answer..." autocomplete="off">
-      <button type="button" class="btn btn-p btn-block" onclick="advance({{ loop.index }})">Next →</button>
+      <button type="button" style="background:#6C63FF;color:white;border:none;padding:14px 28px;border-radius:50px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;width:100%;margin-top:8px;" onclick="advance({{ loop.index }})">Next →</button>
     {% endif %}
   </div>
   {% endfor %}
+  </div>
 
   <div id="done" style="display:none;background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:48px;text-align:center;">
     <div style="font-size:72px;margin-bottom:16px;">🎉</div>
@@ -55,44 +57,56 @@
   </div>
 </form>
 
-<div style="margin-top:16px;"><a href="/learn/{{ topic["id"] }}" style="background:rgba(255,255,255,0.1);color:white;border:1px solid #2A2A4A;padding:10px 20px;border-radius:50px;font-weight:800;font-size:13px;">← Back to Lesson</a></div>
+<div style="margin-top:16px;">
+  <a href="/learn/{{ topic["id"] }}" style="background:rgba(255,255,255,0.1);color:white;border:1px solid #2A2A4A;padding:10px 20px;border-radius:50px;font-weight:800;font-size:13px;display:inline-block;">← Back to Lesson</a>
+</div>
 
 <script>
 var total = {{ questions|length }};
-var answered = false;
+var busy = false;
+
+// Show only first question
+document.getElementById("qc1").style.display = "block";
 
 function pick(btn) {
-  if (answered) return;
+  if (busy) return;
+  busy = true;
   var qid = btn.getAttribute("data-qid");
   var n = parseInt(btn.getAttribute("data-n"));
   var val = btn.getAttribute("data-val");
   document.getElementById("ans" + qid).value = val;
+  // Highlight selected, disable all buttons in this card
   var card = btn.closest(".qcard");
   card.querySelectorAll(".opt").forEach(function(b) {
-    b.classList.remove("sel");
-    b.querySelector(".ltr").style.background = "";
+    b.setAttribute("disabled", "true");
+    b.onclick = null;
   });
   btn.classList.add("sel");
   btn.querySelector(".ltr").style.background = "#6C63FF";
-  card.querySelectorAll(".opt").forEach(function(b){ b.onclick=null; });
-  setTimeout(function() { advance(n); }, 500);
+  setTimeout(function() { advance(n); }, 600);
 }
 
 function advance(n) {
+  // Hide current
   var cur = document.getElementById("qc" + n);
   if (cur) cur.style.display = "none";
+  // Update progress
   var pct = Math.round((n / total) * 100);
   document.getElementById("prog").style.width = pct + "%";
+  document.getElementById("qnum").textContent = Math.min(n + 1, total);
+  // Scroll to top of page
+  document.getElementById("topbar").scrollIntoView({behavior: "smooth"});
   if (n < total) {
     var next = document.getElementById("qc" + (n + 1));
     if (next) next.style.display = "block";
-    document.getElementById("qnum").textContent = n + 1;
   } else {
     document.getElementById("prog").style.width = "100%";
     document.getElementById("done").style.display = "block";
   }
+  busy = false;
 }
 
+// Prevent accidental back navigation
 history.pushState(null, null, location.href);
 window.onpopstate = function() {
   history.pushState(null, null, location.href);
