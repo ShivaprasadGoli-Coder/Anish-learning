@@ -3,151 +3,85 @@
 {% block content %}
 {% set color = COLORS.get(topic["subject"],"#6C63FF") %}
 <style>
-#quiz-wrap .qcard { display: none; }
-#quiz-wrap .qcard.visible { display: block; }
-.opt { width:100%; padding:16px 18px; margin:8px 0; border-radius:14px; border:2px solid #2A2A4A; background:rgba(255,255,255,0.03); font-size:16px; font-weight:700; cursor:pointer; text-align:left; font-family:inherit; color:white; display:flex; align-items:center; gap:12px; }
-.opt.chosen { border-color: {{ color }}; background: rgba(108,99,255,0.2); }
-.ltr { width:36px; height:36px; border-radius:50%; background:#2A2A4A; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:14px; flex-shrink:0; color:white; }
-.opt.chosen .ltr { background: {{ color }}; color: white; }
-.type-in { width:100%; padding:14px; border-radius:14px; border:2px solid #2A2A4A; font-size:16px; font-weight:700; font-family:inherit; background:rgba(255,255,255,0.05); color:white; margin-bottom:10px; display:block; }
-.type-in:focus { outline:none; border-color: {{ color }}; }
-.prog-wrap { background:rgba(255,255,255,0.1); border-radius:50px; height:10px; overflow:hidden; margin-top:8px; }
-.prog-fill { height:100%; border-radius:50px; background:linear-gradient(90deg,{{ color }},{{ color }}88); transition:width 0.4s; }
+.qcard{display:none;background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:24px;margin-bottom:16px;}
+.opt{width:100%;padding:16px 18px;margin:8px 0;border-radius:14px;border:2px solid #2A2A4A;background:rgba(255,255,255,0.03);font-size:16px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit;color:white;display:flex;align-items:center;gap:12px;}
+.opt.chosen{border-color:#6C63FF;background:rgba(108,99,255,0.2);}
+.ltr{width:36px;height:36px;border-radius:50%;background:#2A2A4A;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;flex-shrink:0;color:white;}
+.opt.chosen .ltr{background:#6C63FF;color:white;}
+.type-in{width:100%;padding:14px;border-radius:14px;border:2px solid #2A2A4A;font-size:16px;font-weight:700;font-family:inherit;background:rgba(255,255,255,0.05);color:white;margin-bottom:10px;}
+.prog-wrap{background:rgba(255,255,255,0.1);border-radius:50px;height:10px;overflow:hidden;margin-top:8px;}
+.prog-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,{{ color }},{{ color }}88);transition:width 0.4s;}
 </style>
 
 <div id="topbar" style="background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:20px;margin-bottom:16px;">
   <div style="font-size:15px;font-weight:900;margin-bottom:8px;color:white;">{{ topic["title"] }}</div>
-  <div style="color:rgba(255,255,255,0.5);font-size:13px;font-weight:700;margin-bottom:6px;">
-    Question <span id="qnum">1</span> of {{ questions|length }}
-  </div>
+  <div style="color:rgba(255,255,255,0.5);font-size:13px;font-weight:700;margin-bottom:6px;">Question <span id="qnum">1</span> of {{ questions|length }}</div>
   <div class="prog-wrap"><div class="prog-fill" id="prog" style="width:0%"></div></div>
 </div>
 
-<form method="post" action="/quiz/{{ topic['id'] }}/submit" id="qform">
+<form method="post" action="/quiz/{{ topic["id"] }}/submit" id="qform">
   <input type="hidden" name="next_stage" value="{{ next_stage }}">
-  <div id="quiz-wrap">
   {% for q in questions %}
   <div class="qcard" id="qc{{ loop.index }}">
-    <div style="background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:24px;margin-bottom:16px;">
-      <input type="hidden" name="question_ids" value="{{ q['id'] }}">
-      <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:14px;">
-        {% if q['difficulty']==1 %}Easy{% elif q['difficulty']==2 %}Medium{% else %}Hard{% endif %}
-      </div>
-      <div style="font-size:18px;font-weight:800;line-height:1.6;margin-bottom:20px;color:white;">
-        {{ q['question_text'] }}
-      </div>
-      {% if q['question_type'] == 'mc' %}
-        <input type="hidden" name="answer_{{ q['id'] }}" id="ans{{ q['id'] }}" value="">
-        {% for opt, ltr in [(q['option_a'],'A'),(q['option_b'],'B'),(q['option_c'],'C'),(q['option_d'],'D')] if opt %}
-        <button type="button" class="opt"
-          onclick="pickAnswer(this, '{{ q['id'] }}', {{ loop.index }}, '{{ opt | replace("'", "\\'") }}')"
-          >
-          <div class="ltr">{{ ltr }}</div>
-          <span>{{ opt }}</span>
-        </button>
-        {% endfor %}
-      {% else %}
-        <input type="text" class="type-in" name="answer_{{ q['id'] }}" placeholder="Type your answer...">
-        <button type="button"
-          style="background:#6C63FF;color:white;border:none;padding:16px;border-radius:50px;font-size:16px;font-weight:800;cursor:pointer;width:100%;margin-top:8px;font-family:inherit;"
-          onclick="nextQuestion({{ loop.index }})">Next →</button>
-      {% endif %}
-    </div>
+    <input type="hidden" name="question_ids" value="{{ q["id"] }}">
+    <div style="margin-bottom:14px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);">{% if q["difficulty"]==1 %}Easy{% elif q["difficulty"]==2 %}Medium{% else %}Hard{% endif %}</div>
+    <div style="font-size:18px;font-weight:800;line-height:1.6;margin-bottom:20px;color:white;">{{ q["question_text"] }}</div>
+    {% if q["question_type"] == "mc" %}
+      <input type="hidden" name="answer_{{ q["id"] }}" id="ans{{ q["id"] }}" value="">
+      {% for opt, ltr in [(q["option_a"],"A"),(q["option_b"],"B"),(q["option_c"],"C"),(q["option_d"],"D")] if opt %}
+      <button type="button" class="opt" data-qid="{{ q["id"] }}" data-n="{{ loop.index }}" data-val="{{ opt }}" onclick="pick(this)"><div class="ltr">{{ ltr }}</div><span>{{ opt }}</span></button>
+      {% endfor %}
+    {% else %}
+      <input type="text" class="type-in" name="answer_{{ q["id"] }}" placeholder="Type your answer...">
+      <button type="button" onclick="goTo({{ loop.index }}+1)" style="background:#6C63FF;color:white;border:none;padding:16px;border-radius:50px;font-size:16px;font-weight:800;cursor:pointer;width:100%;margin-top:8px;font-family:inherit;">Next →</button>
+    {% endif %}
   </div>
   {% endfor %}
-  </div>
 
-  <div id="finish-screen" style="display:none;background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:48px;text-align:center;">
-    <div style="font-size:72px;margin-bottom:16px;">🎉</div>
-    <h2 style="font-size:24px;font-weight:900;margin-bottom:8px;color:white;">All done, Anish!</h2>
+  <div id="done" style="display:none;background:#1A1A35;border:1px solid #2A2A4A;border-radius:20px;padding:48px;text-align:center;">
+    <div style="font-size:72px;margin-bottom:16px;">&#127881;</div>
+    <h2 style="font-size:24px;font-weight:900;color:white;margin-bottom:8px;">All done, Anish!</h2>
     <p style="color:rgba(255,255,255,0.5);margin-bottom:24px;">You answered all {{ questions|length }} questions!</p>
-    <button type="submit" style="background:linear-gradient(135deg,#00C896,#00E5AB);color:#0A2E24;border:none;padding:18px 40px;border-radius:50px;font-size:20px;font-weight:900;cursor:pointer;font-family:inherit;width:100%;">🏆 See My Results!</button>
+    <button type="submit" style="background:linear-gradient(135deg,#00C896,#00E5AB);color:#0A2E24;border:none;padding:18px 40px;border-radius:50px;font-size:20px;font-weight:900;cursor:pointer;font-family:inherit;width:100%;">See Results!</button>
   </div>
 </form>
 
-<div style="margin-top:16px;">
-  <a href="/learn/{{ topic['id'] }}" style="background:rgba(255,255,255,0.1);color:white;border:1px solid #2A2A4A;padding:10px 20px;border-radius:50px;font-weight:800;font-size:13px;display:inline-block;">← Back to Lesson</a>
+<div style="margin-top:16px;display:flex;gap:10px;">
+  <button type="button" id="prevBtn" onclick="goTo(cur-1)" style="display:none;background:rgba(255,255,255,0.1);color:white;border:1px solid #2A2A4A;padding:10px 20px;border-radius:50px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;">← Prev</button>
+  <a href="/learn/{{ topic["id"] }}" style="background:rgba(255,255,255,0.1);color:white;border:1px solid #2A2A4A;padding:10px 20px;border-radius:50px;font-weight:800;font-size:13px;display:inline-block;">Back to Lesson</a>
 </div>
 
 <script>
-var TOTAL = {{ questions|length }};
-var busy = false;
-
-function goToQuestion(n) {
-    // Hide all
-    for (var i = 1; i <= TOTAL; i++) {
-        var el = document.getElementById('qc' + i);
-        if (el) {
-            el.classList.remove('visible');
-        }
-    }
-    document.getElementById('finish-screen').style.display = 'none';
-
-    if (n > TOTAL) {
-        // Show finish
-        document.getElementById('finish-screen').style.display = 'block';
-        document.getElementById('prog').style.width = '100%';
-        document.getElementById('qnum').textContent = TOTAL;
-    } else {
-        // Show question n
-        var el = document.getElementById('qc' + n);
-        if (el) el.classList.add('visible');
-        document.getElementById('qnum').textContent = n;
-        document.getElementById('prog').style.width = (Math.round(((n-1)/TOTAL)*100)) + '%';
-    }
-    document.getElementById('topbar').scrollIntoView({behavior: 'smooth', block: 'start'});
+var T={{ questions|length }},cur=1,busy=false;
+function goTo(n){
+  document.querySelectorAll('.qcard').forEach(function(el){el.style.display='none';});
+  document.getElementById('done').style.display='none';
+  if(n>T){
+    document.getElementById('done').style.display='block';
+    document.getElementById('prog').style.width='100%';
+    document.getElementById('qnum').textContent=T;
+    document.getElementById('prevBtn').style.display='none';
+  } else {
+    cur=n;
+    document.getElementById('qc'+n).style.display='block';
+    document.getElementById('qnum').textContent=n;
+    document.getElementById('prog').style.width=Math.round(((n-1)/T)*100)+'%';
+    document.getElementById('prevBtn').style.display=n>1?'inline-block':'none';
+  }
+  document.getElementById('topbar').scrollIntoView({behavior:'smooth',block:'start'});
 }
-
-function pickAnswer(btn, qid, questionNumber, val) {
-    if (busy) return;
-    if (btn.classList.contains('chosen')) return;
-    busy = true;
-
-    // IMMEDIATELY disable ALL buttons on the entire page
-    document.querySelectorAll('.opt').forEach(function(b) {
-        b.onclick = null;
-        b.ontouchstart = null;
-        b.style.pointerEvents = 'none';
-        b.style.userSelect = 'none';
-    });
-
-    // Save the answer
-    var hiddenInput = document.getElementById('ans' + qid);
-    if (hiddenInput) hiddenInput.value = val;
-
-    // Highlight chosen only
-    btn.classList.add('chosen');
-
-    // Move to next after delay
-    setTimeout(function() {
-        busy = false;
-        goToQuestion(questionNumber + 1);
-    }, 400);
+function pick(btn){
+  if(busy)return;
+  if(btn.classList.contains('chosen'))return;
+  busy=true;
+  document.querySelectorAll('.opt').forEach(function(b){b.onclick=null;b.style.pointerEvents='none';});
+  var qid=btn.getAttribute('data-qid');
+  var n=parseInt(btn.getAttribute('data-n'));
+  var val=btn.getAttribute('data-val');
+  document.getElementById('ans'+qid).value=val;
+  btn.classList.add('chosen');
+  setTimeout(function(){busy=false;goTo(n+1);},400);
 }
-
-function nextQuestion(n) {
-    if (busy) return;
-    busy = true;
-    setTimeout(function() {
-        busy = false;
-        goToQuestion(n + 1);
-    }, 100);
-}
-
-// Prevent back swipe
-history.pushState(null, null, location.href);
-window.addEventListener('popstate', function() {
-    history.pushState(null, null, location.href);
-});
-
-// Start at question 1
-goToQuestion(1);
-
-// Extra protection: prevent any double-fire
-document.addEventListener('touchstart', function(e) {
-    if (e.target.classList.contains('opt') || e.target.closest('.opt')) {
-        e.preventDefault();
-    }
-}, {passive: false});
+goTo(1);
 </script>
 {% endblock %}
