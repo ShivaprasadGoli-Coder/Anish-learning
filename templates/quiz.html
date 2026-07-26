@@ -100,12 +100,15 @@ function goToQuestion(n) {
 
 function pickAnswer(btn, qid, questionNumber, val) {
     if (busy) return;
+    if (btn.classList.contains('chosen')) return;
     busy = true;
 
     // IMMEDIATELY disable ALL buttons on the entire page
     document.querySelectorAll('.opt').forEach(function(b) {
         b.onclick = null;
+        b.ontouchstart = null;
         b.style.pointerEvents = 'none';
+        b.style.userSelect = 'none';
     });
 
     // Save the answer
@@ -139,5 +142,12 @@ window.addEventListener('popstate', function() {
 
 // Start at question 1
 goToQuestion(1);
+
+// Extra protection: prevent any double-fire
+document.addEventListener('touchstart', function(e) {
+    if (e.target.classList.contains('opt') || e.target.closest('.opt')) {
+        e.preventDefault();
+    }
+}, {passive: false});
 </script>
 {% endblock %}
