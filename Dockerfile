@@ -3,6 +3,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y libpq-dev gcc && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-ARG CACHEBUST=1
+RUN echo "bust cache $(date)" > /tmp/bust
+COPY templates/ /app/templates/
 COPY . .
 CMD gunicorn app:app --bind 0.0.0.0:$PORT
