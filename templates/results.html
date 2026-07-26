@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Results — {{ topic["title"] }}{% endblock %}
+{% block content %}
+{% set color = COLORS.get(topic["subject"],"#4F46E5") %}
+<div class="card" style="text-align:center;padding:36px;">
+  <div class="result-circle" style="background:linear-gradient(135deg,{% if pct>=80 %}#059669,#10B981{% elif pct>=50 %}#D97706,#F59E0B{% else %}#DC2626,#EF4444{% endif %});">
+    <div class="big">{{ pct }}%</div>
+    <div class="sm">{{ score }}/{{ total }}</div>
+  </div>
+  <div style="font-size:40px;margin-bottom:10px;">{% if pct==100 %}🏆{% elif pct>=80 %}🌟{% elif pct>=60 %}😊{% else %}💪{% endif %}</div>
+  <h2 style="font-size:22px;font-weight:900;color:#302b63;margin-bottom:8px;">
+    {% if pct==100 %}Perfect! Amazing Anish!
+    {% elif pct>=80 %}Excellent work!
+    {% elif pct>=60 %}Good effort!
+    {% elif pct>=40 %}Keep practising!
+    {% else %}Read the lesson again!{% endif %}
+  </h2>
+  {% if next_review %}<p style="color:#666;font-size:14px;">Next review: <strong>{{ next_review }}</strong></p>
+  {% else %}<p style="color:#059669;font-size:14px;font-weight:800;">You have mastered this topic!</p>{% endif %}
+</div>
+<div class="sec-hdr" style="color:white;">Question Review</div>
+{% for r in results %}
+<div class="r-item {{ "ok" if r["correct"] else "no" }}">
+  <div style="display:flex;align-items:flex-start;gap:12px;">
+    <div style="font-size:24px;flex-shrink:0;">{{ "✅" if r["correct"] else "❌" }}</div>
+    <div style="flex:1;">
+      <div style="font-size:14px;font-weight:800;margin-bottom:6px;color:#1a1a2e;">{{ r["question"]["question_text"] }}</div>
+      {% if not r["correct"] %}
+      <div style="font-size:13px;color:#DC2626;margin-bottom:4px;">Your answer: <strong>{{ r["user_answer"] if r["user_answer"] else "(blank)" }}</strong></div>
+      {% endif %}
+      <div style="font-size:13px;color:#059669;margin-bottom:6px;">Correct: <strong>{{ r["question"]["correct_answer"] }}</strong></div>
+      {% if r["question"]["explanation"] %}
+      <div style="font-size:12px;color:#555;background:rgba(0,0,0,0.04);padding:8px 12px;border-radius:8px;line-height:1.6;">{{ r["question"]["explanation"] }}</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+<div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
+  <a href="/quiz/{{ topic["id"] }}" class="btn btn-p" style="flex:1;">Try Again</a>
+  <a href="/learn/{{ topic["id"] }}" class="btn btn-o" style="flex:1;">Re-read Lesson</a>
+  <a href="/subject/{{ topic["subject"] }}" class="btn btn-w" style="flex:1;">More Topics</a>
+</div>
+{% endblock %}

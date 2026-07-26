@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Progress{% endblock %}
+{% block content %}
+<div class="card-glass" style="text-align:center;padding:28px;">
+  <h1 style="font-size:24px;font-weight:900;">Progress Dashboard</h1>
+</div>
+<div class="stats">
+  <div class="stat"><div class="n">{{ started }}/{{ total }}</div><div class="l">Started</div></div>
+  <div class="stat"><div class="n" style="color:#7fff7f;">{{ mastered }}</div><div class="l">Mastered</div></div>
+  <div class="stat"><div class="n" style="color:#f9ca24;">{{ ((started/total)*100)|int if total>0 else 0 }}%</div><div class="l">Coverage</div></div>
+  <div class="stat"><div class="n" style="color:#ff6b6b;">{{ weak|length }}</div><div class="l">Need Work</div></div>
+</div>
+<div class="sec-hdr">By Subject</div>
+{% for s in by_sub %}
+{% set pct = ((s["started_t"]/s["total_t"])*100)|int if s["total_t"]>0 else 0 %}
+<div class="mini">
+  <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+    <strong style="color:#302b63;">{{ s["subject"] }}</strong>
+    <span style="font-weight:900;">{{ pct }}%</span>
+  </div>
+  <div style="background:#eee;border-radius:20px;height:10px;">
+    <div style="height:100%;width:{{ pct }}%;background:#4F46E5;border-radius:20px;"></div>
+  </div>
+  <div style="font-size:12px;color:#999;margin-top:4px;">{{ s["started_t"] }}/{{ s["total_t"] }} topics started</div>
+</div>
+{% endfor %}
+{% if weak %}
+<div class="sec-hdr">Needs More Practice</div>
+{% for w in weak %}
+<div class="mini" style="border-left:5px solid #DC2626;">
+  <strong style="color:#302b63;">{{ w["title"] }}</strong>
+  <div style="font-size:12px;color:#999;">{{ w["subject"] }} - {{ w["session_date"] }}</div>
+</div>
+{% endfor %}
+{% endif %}
+{% if recent %}
+<div class="sec-hdr">Recent Sessions</div>
+{% for s in recent %}
+<div class="mini" style="display:flex;align-items:center;gap:12px;">
+  <div style="flex:1;">
+    <strong style="color:#302b63;">{{ s["title"] }}</strong>
+    <div style="font-size:12px;color:#999;">{{ s["subject"] }} - {{ s["session_date"] }}</div>
+  </div>
+  <span class="badge b-{{ s["rating"] }}">{{ s["rating"] }}</span>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}

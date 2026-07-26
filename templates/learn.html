@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Learn — {{ topic["title"] }}{% endblock %}
+{% block content %}
+{% set color = COLORS.get(topic["subject"],"#4F46E5") %}
+{% set emoji = EMOJIS.get(topic["subject"],"X") %}
+<div class="card-glass" style="padding:24px;margin-bottom:16px;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+    <span style="font-size:36px;">{{ emoji }}</span>
+    <div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;">{{ topic["subject"] }} - {{ topic["section"] }}</div>
+      <h1 style="font-size:20px;font-weight:900;margin-top:4px;">{{ topic["title"] }}</h1>
+    </div>
+  </div>
+  <span style="background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;">{{ q_count }} practice questions</span>
+</div>
+<div class="card">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:2px solid #EEF2FF;">
+    <span style="font-size:24px;">X</span>
+    <h2 style="font-size:18px;font-weight:900;color:#302b63;">Read the lesson first!</h2>
+  </div>
+  {% if topic["lesson_html"] %}
+    {{ topic["lesson_html"] | safe }}
+  {% else %}
+    <div class="lesson-block definition"><h3>{{ topic["title"] }}</h3><p>Study this topic then practice below.</p></div>
+  {% endif %}
+</div>
+{% if not parent_mode %}
+<div class="card" style="text-align:center;padding:28px;">
+  <div style="font-size:44px;margin-bottom:12px;">X</div>
+  <h2 style="font-size:20px;font-weight:900;color:#302b63;margin-bottom:8px;">Ready to practise?</h2>
+  <p style="color:#666;margin-bottom:20px;font-size:14px;">5 questions — easy, medium and hard. Take your time!</p>
+  <a href="/quiz/{{ topic["id"] }}" class="btn btn-p btn-lg">Start Questions</a>
+</div>
+{% endif %}
+<div style="margin-top:12px;"><a href="/subject/{{ topic["subject"] }}" class="btn btn-w">Back to {{ topic["subject"] }}</a></div>
+{% endblock %}
