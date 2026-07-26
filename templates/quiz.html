@@ -102,30 +102,24 @@ function pickAnswer(btn, qid, questionNumber, val) {
     if (busy) return;
     busy = true;
 
+    // IMMEDIATELY disable ALL buttons on the entire page
+    document.querySelectorAll('.opt').forEach(function(b) {
+        b.onclick = null;
+        b.style.pointerEvents = 'none';
+    });
+
     // Save the answer
     var hiddenInput = document.getElementById('ans' + qid);
     if (hiddenInput) hiddenInput.value = val;
 
-    // Disable all options in this question
-    var card = document.getElementById('qc' + questionNumber);
-    if (card) {
-        var allOpts = card.querySelectorAll('.opt');
-        allOpts.forEach(function(opt) {
-            opt.onclick = null;
-            opt.style.pointerEvents = 'none';
-            opt.style.opacity = '0.5';
-        });
-    }
-
-    // Highlight chosen
+    // Highlight chosen only
     btn.classList.add('chosen');
-    btn.style.opacity = '1';
 
-    // Move to next after short delay
+    // Move to next after delay
     setTimeout(function() {
         busy = false;
         goToQuestion(questionNumber + 1);
-    }, 450);
+    }, 400);
 }
 
 function nextQuestion(n) {
