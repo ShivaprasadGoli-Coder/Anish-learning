@@ -116,7 +116,7 @@ def make_q_page(topic, q, qnum, total, color, next_stage, prev_data):
 <div style="font-size:17px;font-weight:800;line-height:1.6;color:white;margin-bottom:18px;">{q}</div>
 <form method=post action=/quiz/{tid}/answer>{hidden}{opts}</form>
 </div>
-<a href=/learn/{tid} style="color:rgba(255,255,255,0.4);font-size:13px;font-weight:700;text-decoration:none;">Back to Lesson</a>
+<a href="javascript:history.back()" style="background:rgba(255,255,255,0.1);color:white;border:1px solid #2A2A4A;padding:10px 20px;border-radius:50px;font-weight:800;font-size:13px;margin-right:8px;">← Previous</a><a href=/learn/{tid} style="color:rgba(255,255,255,0.4);font-size:13px;font-weight:700;text-decoration:none;">Back to Lesson</a>
 </div></body></html>'''.format(title=safe_title,qnum=qnum,total=total,pct=pct,color=color,diff=diff,q=safe_q,tid=topic['id'],hidden=hidden,opts=opts), mimetype='text/html')
 
 @app.route('/quiz/<int:topic_id>')
