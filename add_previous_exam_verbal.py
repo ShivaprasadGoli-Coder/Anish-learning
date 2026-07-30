@@ -241,9 +241,9 @@ separate patterns (1st, 3rd, 5th... and 2nd, 4th, 6th...).</p>
 <p style="margin-top:12px;color:rgba(255,255,255,0.4);font-size:12px;">Source: GL Assessment 11+ Verbal Reasoning Familiarisation Papers 1 & 3</p>
 """
 _NUMSEQ_RAW = [
-    ("27 26 28 25 29 24 30 [?]", "33", "29", "25", "23", "31", "31"),
-    ("4 8 11 15 18 [?]", "21", "20", "25", "22", "28", "21"),
-    ("28 32 25 27 22 22 19 17 16 [?]", "15", "13", "12", "14", "11", "14"),
+    ("27 26 28 25 29 24 30 [?]", "33", "29", "25", "23", "31", "23"),
+    ("4 8 11 15 18 [?]", "21", "20", "25", "22", "28", "22"),
+    ("28 32 25 27 22 22 19 17 16 [?]", "15", "13", "12", "14", "11", "12"),
     ("20 23 27 32 38 [?]", "45", "48", "46", "39", "51", "45"),
     ("57 56 54 52 50 47 45 41 39 [?]", "32", "31", "35", "33", "34", "34"),
     ("88 92 90 95 92 98 94 101 [?]", "100", "95", "93", "96", "99", "96"),
@@ -278,15 +278,15 @@ cannot) be true.</p>
 """
 LOGIC_QUESTIONS = [
     ("At the shops Darren bought 8 oranges. Laura bought 3 oranges fewer than Chris. Rosario bought 3 oranges fewer than Darren and 1 fewer than Chris. How many oranges did Laura buy?",
-     "mc", "1", "9", "3", "5", "2", "5", "Rosario = 8-3 = 5, so Chris = 5+1 = 6, so Laura = 6-3 = 3... checking against options, Laura bought 5.", 2),
+     "mc", "1", "9", "3", "5", "2", "3", "Rosario = Darren - 3 = 8 - 3 = 5. Since Rosario is also 1 fewer than Chris, Chris = 5 + 1 = 6. Laura = Chris - 3 = 6 - 3 = 3.", 2),
     ("A cinema is open every night from 7 pm. The latest time a film begins is 11 pm. Films start at 7.15pm, 8.15pm and 9.15pm on Tuesdays/Thursdays. On Mondays/Wednesdays films start on the hour, every hour. At the weekend films start every half hour from 7pm. Which must be true? A) No films start at 9.30pm B) On Tuesday a film starts at 9pm C) Films start at 9.15pm three days each week D) A film starts at 9pm on Monday, Wednesday and at the weekend E) All films finish before 11pm",
      "mc", "No films start at 9.30 pm.", "On Tuesday, a film starts at 9 pm.", "Films start at 9.15 pm three days each week.", "A film starts at 9 pm on Monday, Wednesday and at the weekend.", "All films finish before 11 pm.", "A film starts at 9 pm on Monday, Wednesday and at the weekend.", "Mon/Wed start on the hour (includes 9pm) and weekends start every half hour from 7pm (includes 9pm).", 3),
     ("In a block of flats, Natalie lives two floors below Michelle and one floor above Christopher. Yousuf lives one floor above Natalie. Matthew lives one floor below Michelle. Who lives on the same floor?",
      "mc", "Yousuf and Natalie.", "Yousuf and Matthew.", "Matthew and Michelle.", "Christopher and Matthew.", "Natalie and Michelle.", "Yousuf and Matthew.", "Yousuf is one floor above Natalie, and Natalie is one floor below Michelle's floor minus one more — working through the floors, Yousuf and Matthew share a floor.", 2),
     ("A cat has 5 kittens. 2 are brown and 2 are grey. All black and grey kittens have green eyes. White kittens have blue eyes. Which must be true? A) None of the kittens are black B) None have blue eyes C) The grey kittens have blue eyes D) All kittens are male E) At least 2 of the kittens have green eyes",
      "mc", "None of the kittens are black.", "None of the kittens have blue eyes.", "The grey kittens have blue eyes.", "All of the kittens are male.", "At least 2 of the kittens have green eyes.", "At least 2 of the kittens have green eyes.", "The 2 grey kittens must have green eyes (all grey kittens do), so at least 2 kittens have green eyes.", 2),
-    ("Jessica, Peter, Mohammed, Tanya and Becky are growing tomato plants, each with 3 seeds. Jessica has one tall plant among her others. Mohammed's three plants are all healthy. Peter and Becky did not grow plants from all of their seeds. Tanya only planted one seed. Tanya had the fewest plants. How many tomato plants did the children grow between them?",
-     "mc", "8", "9", "11", "13", "15", "11", "Jessica likely has 3, Mohammed has 3 (all healthy), Tanya has 1 (fewest), Peter and Becky each grew fewer than 3 — totals work out to 11.", 3),
+    ("Jessica, Peter, Mohammed, Tanya and Becky are growing tomato plants, each starting with 3 seeds. Jessica has one tall plant among her others (so more than 1). Mohammed's three plants are all healthy (so all 3 seeds grew). Peter and Becky did not grow plants from all of their seeds (so each has fewer than 3). Tanya only planted one seed, and had the fewest plants of all. How many tomato plants did the children grow between them?",
+     "mc", "8", "9", "11", "13", "15", "11", "Mohammed = 3, Tanya = 1 (fewest). Jessica has more than one plant, and Peter/Becky each have fewer than 3 but more than Tanya's 1 — a consistent split is Jessica=3, Peter=2, Becky=2, giving 3+2+3+1+2 = 11 in total.", 3),
     ("Susie, Molly, Hannah and Freya are sisters. Susie has school lunches Mon/Wed/Fri, packed Tue/Thu. Molly has school lunches every day except Monday. Hannah has packed lunches Mon/Thu/Fri. Freya has school lunches when Hannah does, plus Fridays. Which sentence CANNOT be true?",
      "mc", "Three sisters have school lunches on Fridays.", "There is only one day all sisters have school lunches.", "Two sisters have packed lunches on Mondays.", "Molly has the most school lunches per week.", "Only Hannah has a packed lunch on Fridays.", "Two sisters have packed lunches on Mondays.", "On Monday, Hannah has a packed lunch and Freya has a school lunch (since Freya has school lunches when Hannah doesn't have one, plus Fridays) — only one sister (Hannah) has a packed lunch on Monday, not two.", 3),
 ]
@@ -422,26 +422,26 @@ group) of letters, then find the next / matching pair.</p>
 """
 _ALPHASEQ_RAW = [
     ("UD VF WH XJ [?]", "ZL", "YL", "YK", "ZK", "YM", "YL"),
-    ("ZO WL TI QF [?]", "NC", "OD", "MC", "ND", "OB", "OD"),
+    ("ZO WL TI QF [?]", "NC", "OD", "MC", "ND", "OB", "NC"),
     ("AQ CM EI GE [?]", "JB", "IB", "HE", "IA", "JA", "IA"),
-    ("HQ LR PS TT [?]", "WV", "UV", "XU", "XT", "UX", "XT"),
+    ("HQ LR PS TT [?]", "WV", "UV", "XU", "XT", "UX", "XU"),
     ("SG NL JP GS [?]", "ET", "UE", "DT", "DU", "EU", "EU"),
     ("KM LL ML NM OO PR [?]", "QU", "RU", "RV", "QV", "QW", "QV"),
     ("CQ BL ZH WE [?]", "SC", "RC", "TD", "TC", "SD", "SC"),
     ("JL ML PL SL VL [?]", "ZL", "YL", "VL", "XL", "UL", "YL"),
-    ("BE CJ EN HQ LS [?]", "QS", "QT", "MS", "ST", "MT", "MT"),
-    ("KD XP NG VN QJ TL TM RJ [?]", "WP", "VM", "PH", "RK", "VO", "VO"),
+    ("BE CJ EN HQ LS [?]", "QS", "QT", "MS", "ST", "MT", "QT"),
+    ("KD XP NG VN QJ TL TM RJ [?]", "WP", "VM", "PH", "RK", "VO", "WP"),
     ("FL EK GM DJ HN [?]", "MI", "DJ", "CJ", "MS", "CI", "CI"),
-    ("WX ZA DE IJ [?]", "QR", "OP", "NO", "PQ", "MN", "PQ"),
-    ("BX BY CA ED HH [?]", "MM", "LM", "ML", "LN", "LL", "LL"),
-    ("XZ ZY YA AZ ZB [?]", "BA", "YD", "CA", "YA", "BD", "YA"),
-    ("AS is to EO as BK is to [?]", "XH", "FG", "XO", "FO", "XG", "FO"),
+    ("WX ZA DE IJ [?]", "QR", "OP", "NO", "PQ", "MN", "OP"),
+    ("BX BY CA ED HH [?]", "MM", "LM", "ML", "LN", "LL", "LM"),
+    ("XZ ZY YA AZ ZB [?]", "BA", "YD", "CA", "YA", "BD", "BA"),
+    ("AS is to EO as BK is to [?]", "XH", "FG", "XO", "FO", "XG", "FG"),
     ("OV is to KS as DR is to [?]", "ZU", "HO", "AU", "ZO", "HN", "ZO"),
     ("AW is to DY as VB is to [?]", "DA", "YZ", "XZ", "XB", "YD", "YD"),
     ("HR is to CP as FN is to [?]", "AP", "ZP", "KL", "KN", "AL", "AL"),
     ("TY is to YZ as BA is to [?]", "GZ", "WB", "WZ", "GB", "XB", "GB"),
     ("CD is to ZE as TZ is to [?]", "WB", "QY", "QA", "VA", "WY", "QA"),
-    ("HT is to LP as QL is to [?]", "UH", "MH", "UP", "MI", "TP", "UP"),
+    ("HT is to LP as QL is to [?]", "UH", "MH", "UP", "MI", "TP", "UH"),
 ]
 ALPHASEQ_QUESTIONS = []
 for i, (stem, a, b, c, d, e, ans) in enumerate(_ALPHASEQ_RAW):
@@ -616,20 +616,20 @@ letter that answer equals.</p>
 <p style="margin-top:12px;color:rgba(255,255,255,0.4);font-size:12px;">Source: GL Assessment 11+ Verbal Reasoning Familiarisation Papers 2 & 3</p>
 """
 _LETTERNUM_RAW = [
-    ("A=2, B=3, C=4, D=5, E=6. B×D−E−D = ?", 2, 3, 4, 5, 6, "B×D−E−D", "A"),
-    ("A=2, B=5, C=15, D=23, E=27. A×C−B+A = ?", 2, 5, 15, 23, 27, "A×C−B+A", "C"),
-    ("A=1, B=3, C=5, D=15, E=20. B×E÷D+A = ?", 1, 3, 5, 15, 20, "B×E÷D+A", "B"),
+    ("A=2, B=3, C=4, D=5, E=6. B×D−E−D = ?", 2, 3, 4, 5, 6, "B×D−E−D", "C"),
+    ("A=2, B=5, C=15, D=23, E=27. A×C−B+A = ?", 2, 5, 15, 23, 27, "A×C−B+A", "E"),
+    ("A=1, B=3, C=5, D=15, E=20. B×E÷D+A = ?", 1, 3, 5, 15, 20, "B×E÷D+A", "C"),
     ("A=3, B=5, C=8, D=9, E=15. D×B÷E+B = ?", 3, 5, 8, 9, 15, "D×B÷E+B", "C"),
     ("A=6, B=9, C=12, D=27, E=45. D÷B×C−B = ?", 6, 9, 12, 27, 45, "D÷B×C−B", "D"),
-    ("A=3, B=4, C=5, D=6, E=8. D×E÷B−B = ?", 3, 4, 5, 6, 8, "D×E÷B−B", "D"),
+    ("A=3, B=4, C=5, D=6, E=8. D×E÷B−B = ?", 3, 4, 5, 6, 8, "D×E÷B−B", "E"),
     ("A=3, B=6, C=14, D=28, E=90. A×D÷B = ?", 3, 6, 14, 28, 90, "A×D÷B", "C"),
     ("A=2, B=4, C=6, D=8, E=16. E÷D+A = ?", 2, 4, 6, 8, 16, "E÷D+A", "B"),
     ("A=2, B=3, C=4, D=8, E=12. C×B÷A+A = ?", 2, 3, 4, 8, 12, "C×B÷A+A", "D"),
-    ("A=5, B=11, C=37, D=43, E=49. B×A−C+E... (uses B×A, then −C, then +E)", 5, 11, 37, 43, 49, "B×A−C+E", "A"),
+    ("A=5, B=11, C=37, D=43, E=49. D−C+A = ?", 5, 11, 37, 43, 49, "D−C+A", "B"),
     ("A=6, B=8, C=9, D=12, E=14. C×B÷D = ?", 6, 8, 9, 12, 14, "C×B÷D", "A"),
-    ("A=2, B=3, C=8, D=13, E=14. E×B÷A−C = ?", 2, 3, 8, 13, 14, "E×B÷A−C", "A"),
-    ("A=42, B=48, C=49, D=57, E=64. D+C−E = ?", 42, 48, 49, 57, 64, "D+C−E", "B"),
-    ("A=5, B=10, C=15, D=65, E=75. E÷A−A = ?", 5, 10, 15, 65, 75, "E÷A−A", "D"),
+    ("A=2, B=3, C=8, D=13, E=14. E×B÷A−C = ?", 2, 3, 8, 13, 14, "E×B÷A−C", "D"),
+    ("A=42, B=48, C=49, D=57, E=64. D+C−E = ?", 42, 48, 49, 57, 64, "D+C−E", "A"),
+    ("A=5, B=10, C=15, D=65, E=75. E÷A−A = ?", 5, 10, 15, 65, 75, "E÷A−A", "B"),
 ]
 LETTERNUM_QUESTIONS = []
 for i, (setup, va, vb, vc, vd, ve, expr, ans) in enumerate(_LETTERNUM_RAW):
@@ -658,7 +658,7 @@ _BALANCE_RAW = [
     ("81÷27+36 = 6×7−[?]", "4", "7", "3", "5", "2", "3"),
     ("125÷5 = 8×9−[?]", "45", "50", "32", "47", "37", "47"),
     ("6×13−15 = 18+72−[?]", "23", "25", "29", "31", "27", "27"),
-    ("144÷6+3 = 72÷8+[?]", "18", "14", "16", "12", "10", "12"),
+    ("144÷6+3 = 72÷8+[?]", "18", "14", "16", "12", "10", "18"),
 ]
 BALANCE_QUESTIONS = []
 for i, (eq, a, b, c, d, e, ans) in enumerate(_BALANCE_RAW):
@@ -681,19 +681,26 @@ requested word.</p>
 </div>
 <p style="margin-top:12px;color:rgba(255,255,255,0.4);font-size:12px;">Source: GL Assessment 11+ Verbal Reasoning Familiarisation Papers 1, 2 & 3</p>
 """
+# Note: the first 12 questions (4 "number code" families) use the same real
+# words as the original GL booklets, but the digit-cipher itself was
+# reconstructed to guarantee internal consistency — the multi-digit codes
+# originally transcribed from the PDF images contradicted each other
+# letter-by-letter and couldn't be trusted. The 6 "if the code for X is Y"
+# questions further below are unchanged and were verified correct against
+# the source. See the file's audit notes for details.
 _CODES_RAW = [
-    ("ANTS=5836, BASE=?, LETS=8672 (BASE, ANTS, LETS given as: 5836 4172 8672 for ANTS/BASE/LETS in some order). Find the code for BASE.", "5836", "5368", "5872", "5462", "5426", "5426"),
-    ("Using the same code family as ANTS/BASE/LETS/BLUE, find the code for EAST.", "4627", "6428", "6472", "6427", "4678", "6427"),
-    ("Using the same code family, find the word with code 7316.", "TUBS", "TUNE", "TUNA", "TANS", "TABS", "TUNE"),
-    ("KITE=8457, INTO=5716, PAIN=3512, POET=? (one code missing). Find the code for KITE.", "3512", "5716", "8621", "3421", "5632", "3421"),
-    ("Using the same code family, find the word with code 8243.", "PEAT", "PEAK", "TEAK", "TANK", "PENT", "PEAK"),
-    ("Using the same code family, find the code for KNOT.", "3751", "3761", "7351", "7361", "3851", "3761"),
-    ("NAIL=3752, FIND=5674, LATE=4689, FIST=? (one code missing). Find the code for FIND.", "3752", "5674", "4689", "3759", "5632", "5674"),
-    ("Using the same code family, find the word with code 4963.", "DEAL", "LIFE", "DEAF", "LEAF", "LEAD", "LEAF"),
-    ("Using the same code family, find the code for FLINT.", "53758", "34762", "34769", "53762", "34758", "34758"),
-    ("TIME=4726, HEAT=5163, MELT=3251, SAIL=? (one code missing). Find the code for SAIL.", "4726", "5163", "4752", "3726", "3752", "3752"),
-    ("Using the same code family, find the word with code 61743.", "MEATS", "LEAKS", "LEAST", "LASTS", "STEAL", "STEAL"),
-    ("Using the same code family, find the code for STEAM.", "41725", "43875", "34875", "42176", "43175", "43175"),
+    ("In this code family: ANTS=1234, LETS=5634, EAST=6143 (one code missing). Find the code for BASE.", "1234", "7146", "6417", "1476", "7461", "7146"),
+    ("Using the same code family, find the code for NEST.", "2643", "2634", "6243", "4263", "2436", "2643"),
+    ("Using the same code family, find the word with code 3156.", "TALE", "TAIL", "LATE", "SALE", "SEAT", "TALE"),
+    ("In this code family: INTO=2536, PAIN=7825, POET=7643 (one code missing). Find the code for KITE.", "1243", "2134", "1234", "4321", "1324", "1234"),
+    ("Using the same code family, find the word with code 7481.", "PEAK", "PEAT", "TEAK", "PACT", "TAPE", "PEAK"),
+    ("Using the same code family, find the code for OPEN.", "6745", "7645", "6754", "4675", "6547", "6745"),
+    ("In this code family: NAIL=1234, LATE=4278, FIST=5397 (one code missing). Find the code for FIND.", "5316", "3516", "5361", "1536", "5163", "5316"),
+    ("Using the same code family, find the word with code 9258.", "SAFE", "SEAT", "FEAS", "FATE", "SAFT", "SAFE"),
+    ("Using the same code family, find the code for LEAST.", "48297", "42897", "48927", "49287", "48279", "48297"),
+    ("In this code family: TIME=1234, HEAT=5461, MELT=3471 (one code missing). Find the code for SAIL.", "8267", "8627", "6827", "8672", "2867", "8627"),
+    ("Using the same code family, find the word with code 1627.", "TAIL", "TALI", "LAIT", "TILA", "LATI", "TAIL"),
+    ("Using the same code family, find the code for SALT.", "8671", "8617", "8761", "6871", "8176", "8671"),
     ("If the code for FORE is DSPI, what is the code for PILL?", "NKJP", "NLNN", "RMNJ", "RKJN", "NMJP", "NMJP"),
     ("If the code for NEWS is QCZQ, what is the code for TAPS?", "WYRU", "WYSQ", "QCSQ", "WCRP", "QYMU", "WYSQ"),
     ("If the code for TRIP is SNHL, what is the code for CARS?", "DZSO", "BWQO", "AZSP", "XXQP", "YWSO", "BWQO"),
