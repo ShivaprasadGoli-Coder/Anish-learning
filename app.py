@@ -13,8 +13,8 @@ app.secret_key = 'anish-11plus-2027-v2'
 PARENT_MODE = os.environ.get('PARENT_MODE','0') == '1'
 REVIEW_GAPS = [0, 2, 6, 13, 29]
 REVIEW_LABELS = ["Learn","Day 3","Day 7","Day 14","Day 30"]
-SUBJECT_COLORS = {'Maths':'#4F46E5','English':'#059669','Verbal Reasoning':'#DC2626'}
-SUBJECT_EMOJIS = {'Maths':'🔢','English':'📚','Verbal Reasoning':'🧠'}
+SUBJECT_COLORS = {'Maths':'#4F46E5','English':'#059669','Verbal Reasoning':'#DC2626','Previous Exam Questions':'#D97706'}
+SUBJECT_EMOJIS = {'Maths':'🔢','English':'📚','Verbal Reasoning':'🧠','Previous Exam Questions':'🗂️'}
 
 def next_review_date(session_date_str, stage, struggled=False):
     if struggled:
@@ -92,7 +92,7 @@ def make_q_page(topic, q, qnum, total, color, next_stage, prev_data):
 
     opts = ''
     if q['question_type'] == 'mc':
-        for val, ltr in [(q['option_a'],'A'),(q['option_b'],'B'),(q['option_c'],'C'),(q['option_d'],'D')]:
+        for val, ltr in [(q['option_a'],'A'),(q['option_b'],'B'),(q['option_c'],'C'),(q['option_d'],'D'),(q.get('option_e'),'E')]:
             if val:
                 sv = str(val).replace('&','&amp;').replace('<','&lt;').replace('>','&gt;').replace('"','&quot;')
                 opts += '<button type="submit" name="ans" value="{v}" style="width:100%;padding:16px 18px;margin:8px 0;border-radius:14px;border:2px solid #2A2A4A;background:rgba(255,255,255,0.03);font-size:16px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit;color:white;display:flex;align-items:center;gap:12px;touch-action:manipulation;-webkit-appearance:none;transition:background 0.1s,border-color 0.1s;"><span style="width:34px;height:34px;border-radius:50%;background:#2A2A4A;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;">{l}</span><span>{v}</span></button>'.format(v=sv,l=ltr)

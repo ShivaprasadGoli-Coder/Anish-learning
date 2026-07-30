@@ -20,11 +20,12 @@ CREATE TABLE IF NOT EXISTS questions (
     topic_id INTEGER NOT NULL REFERENCES topics(id),
     question_text TEXT NOT NULL,
     question_type TEXT NOT NULL,
-    option_a TEXT, option_b TEXT, option_c TEXT, option_d TEXT,
+    option_a TEXT, option_b TEXT, option_c TEXT, option_d TEXT, option_e TEXT,
     correct_answer TEXT NOT NULL,
     explanation TEXT,
     difficulty INTEGER DEFAULT 1
 );
+ALTER TABLE questions ADD COLUMN IF NOT EXISTS option_e TEXT;
 CREATE TABLE IF NOT EXISTS sessions (
     id SERIAL PRIMARY KEY,
     topic_id INTEGER NOT NULL REFERENCES topics(id),
